@@ -12,7 +12,6 @@ def load_data():
 
 def get_column_data(column_name, df, stim):
     stim = stim[:, 16:-16, 16:-16]
-    test_imgs = stim[:50]
     eval_imgs = stim[50:60]
     train_imgs = stim[60:]
 
@@ -31,4 +30,4 @@ def get_column_data(column_name, df, stim):
     eval_imgs = eval_imgs[filter_nans]
     eval_labels = eval_labels[filter_nans]
 
-    return train_imgs, train_labels, eval_imgs, eval_labels, test_imgs
+    return train_imgs, train_labels, eval_imgs, eval_labels

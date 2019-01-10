@@ -8,14 +8,12 @@ def main():
     tf.logging.set_verbosity(tf.logging.INFO)
 
     df, stim = load_data()
-
     columns = list(df.columns)[1:]
-    print(columns)
 
     for i, column_name in enumerate(columns):
         print('Column %s' % column_name)
 
-        train_imgs, train_labels, eval_imgs, eval_labels, test_imgs = get_column_data(column_name, df, stim)
+        train_imgs, train_labels, eval_imgs, eval_labels = get_column_data(column_name, df, stim)
 
         # create the estimator
         estimator = tf.estimator.Estimator(
