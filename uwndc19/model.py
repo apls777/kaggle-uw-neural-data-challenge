@@ -39,13 +39,12 @@ def model_fn(features, labels, mode, params):
     logits = tf.reshape(logits, shape=(-1,))
 
     predictions = {
-        'spike': logits,
+        'spike': tf.maximum(tf.constant(0, dtype=tf.float32), logits),
     }
 
     if mode == tf.estimator.ModeKeys.PREDICT:
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
-    # labels = tf.expand_dims(labels, axis=-1)
     loss = tf.losses.mean_squared_error(labels=labels, predictions=logits)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
