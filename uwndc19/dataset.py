@@ -26,15 +26,23 @@ def get_datasets(df, imgs, eval_size):
     labels = labels[perm]
     nan_mask = nan_mask[perm]
 
+    # get indices for training and evaluations datasets
+    # make sure that evaluation example have values in all columns
+    example_has_all_values = np.all(nan_mask, axis=-1)
+    all_values_example_indices = np.argwhere(example_has_all_values)
+    eval_indices = all_values_example_indices[:eval_size].reshape(-1)
+    train_indices = np.concatenate([all_values_example_indices[eval_size:],
+                                    np.argwhere(np.logical_not(example_has_all_values))]).reshape(-1)
+
     # evaluation dataset
-    eval_imgs = imgs[:eval_size]
-    eval_labels = labels[:eval_size]
-    eval_nan_mask = nan_mask[:eval_size]
+    eval_imgs = imgs[eval_indices]
+    eval_labels = labels[eval_indices]
+    eval_nan_mask = nan_mask[eval_indices]
 
     # training dataset
-    train_imgs = imgs[eval_size:]
-    train_labels = labels[eval_size:]
-    train_nan_mask = nan_mask[eval_size:]
+    train_imgs = imgs[train_indices]
+    train_labels = labels[train_indices]
+    train_nan_mask = nan_mask[train_indices]
 
     return train_imgs, train_labels, train_nan_mask, eval_imgs, eval_labels, eval_nan_mask
 

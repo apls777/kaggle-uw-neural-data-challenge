@@ -10,9 +10,9 @@ def main():
     tf.logging.set_verbosity(tf.logging.INFO)
 
     eval_steps = 10
-    eval_size = 50
+    eval_size = 30
     export_best_models = True
-    model_name = 'dense1024'
+    model_name = 'do02-d512-d02-eval30-2'
 
     # load the data
     df, imgs = load_data()
@@ -29,6 +29,7 @@ def main():
             model_dir=model_dir,
             save_checkpoints_steps=eval_steps,
             save_summary_steps=eval_steps,
+            keep_checkpoint_max=3,
         )
     )
 
@@ -44,14 +45,15 @@ def main():
         'image': eval_imgs,
         'nan_mask': eval_nan_mask,
     }
-    eval_input_fn = tf.estimator.inputs.numpy_input_fn(x=eval_data, y=eval_labels, num_epochs=1, shuffle=False)
+    eval_input_fn = tf.estimator.inputs.numpy_input_fn(x=eval_data, y=eval_labels,
+                                                       batch_size=len(eval_labels), num_epochs=1, shuffle=False)
 
     # hooks
     early_stopping_hook = early_stopping.stop_if_no_decrease_hook(estimator, 'rmse', eval_steps * 10,
                                                                   run_every_secs=None, run_every_steps=eval_steps)
     exporter = tf.estimator.BestExporter(name='best',
                                          serving_input_receiver_fn=serving_input_receiver_fn,
-                                         exports_to_keep=1,
+                                         exports_to_keep=3,
                                          compare_fn=lambda best_eval_result, current_eval_result:
                                              # should be "<=" to export the best model on the 1st evaluation
                                              current_eval_result['rmse'] <= best_eval_result['rmse'],
