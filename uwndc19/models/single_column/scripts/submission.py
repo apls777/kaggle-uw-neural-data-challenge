@@ -1,7 +1,7 @@
 import csv
 import os
 import tensorflow as tf
-from uwndc19.input import load_data
+from uwndc19.dataset import load_data
 from uwndc19.utils import root_dir
 from tensorflow.contrib import predictor
 
@@ -9,7 +9,7 @@ from tensorflow.contrib import predictor
 def main():
     tf.logging.set_verbosity(tf.logging.INFO)
 
-    models_dir = 'training/models2'
+    models_dir = 'training/single_column/models3'
 
     # load the data
     df, stim = load_data()
@@ -33,7 +33,7 @@ def main():
         column_predictions[column_name] = predict_fn(test_data)['spike']
 
     # generate a submission file
-    with open(root_dir('data/submission/2.csv'), 'w') as f:
+    with open(root_dir('data/submission/single_column/3.csv'), 'w') as f:
         writer = csv.writer(f)
         writer.writerow(['Id'] + columns)
         for i in range(len(test_data['image'])):

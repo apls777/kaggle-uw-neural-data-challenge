@@ -1,7 +1,8 @@
 import tensorflow as tf
 from tensorflow.contrib.estimator.python.estimator import early_stopping
-from uwndc19.input import load_data, get_column_data, serving_input_receiver_fn
-from uwndc19.model import model_fn
+from uwndc19.dataset import load_data, get_column_datasets
+from uwndc19.models.single_column.input import serving_input_receiver_fn
+from uwndc19.models.single_column.model import model_fn
 from uwndc19.utils import root_dir
 
 
@@ -9,13 +10,14 @@ def main():
     tf.logging.set_verbosity(tf.logging.INFO)
 
     eval_steps = 10
-    export_best_models = False
+    eval_size = 50
+    export_best_models = True
     train_column_id = None
-    models_dir = 'training/models2'
+    models_dir = 'training/single_column/models3'
     models_postfix = ''
 
     # load the data
-    df, stim = load_data()
+    df, imgs = load_data()
     columns = list(df.columns)[1:]
 
     # train a model for each column
@@ -25,7 +27,9 @@ def main():
 
         print('Training the model for the column "%s"...' % column_name)
 
-        train_imgs, train_labels, eval_imgs, eval_labels = get_column_data(column_name, df, stim)
+        train_imgs, train_labels, eval_imgs, eval_labels = get_column_datasets(column_name, df, imgs, eval_size)
+
+        print('Train size: %d, eval size: %d' % (len(train_labels), len(eval_labels)))
 
         # create the estimator
         model_dir = root_dir('%s/%d_%s' % (models_dir, i, column_name))
@@ -56,7 +60,8 @@ def main():
                                              serving_input_receiver_fn=serving_input_receiver_fn,
                                              exports_to_keep=1,
                                              compare_fn=lambda best_eval_result, current_eval_result:
-                                                 current_eval_result['rmse'] < best_eval_result['rmse'],
+                                                 # should be "<=" to export the best model on the 1st evaluation
+                                                 current_eval_result['rmse'] <= best_eval_result['rmse'],
                                              )
 
         # train and evaluate

@@ -4,11 +4,14 @@ from uwndc19.utils import root_dir
 
 
 def main(use_best_value: bool):
-    models_dir = root_dir('training/models2')
+    models_dir = root_dir('training/single_column/models3')
     model_subdirs = os.listdir(models_dir)
 
     models_rmses = []
     for subdir in model_subdirs:
+        if subdir.startswith('.'):
+            continue
+
         # read the model summaries
         eval_dir = os.path.join(models_dir, subdir, 'eval')
         eval_results = read_eval_metrics(eval_dir)
@@ -30,4 +33,4 @@ def main(use_best_value: bool):
 
 
 if __name__ == '__main__':
-    main(use_best_value=False)
+    main(use_best_value=True)
