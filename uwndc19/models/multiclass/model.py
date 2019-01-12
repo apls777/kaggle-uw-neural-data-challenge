@@ -31,9 +31,9 @@ def model_fn(features, labels, mode, params):
 
     flat = tf.reshape(pool3, [-1, 6 * 6 * 96])
 
-    dropout = tf.layers.dropout(inputs=flat, rate=0.2, training=mode == tf.estimator.ModeKeys.TRAIN)
+    dropout = tf.layers.dropout(inputs=flat, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
     dense = tf.layers.dense(inputs=dropout, units=512, activation=tf.nn.relu)
-    dropout = tf.layers.dropout(inputs=dense, rate=0.2, training=mode == tf.estimator.ModeKeys.TRAIN)
+    dropout = tf.layers.dropout(inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
 
     logits = tf.layers.dense(inputs=dropout, units=18)
 

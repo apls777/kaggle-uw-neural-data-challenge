@@ -12,7 +12,7 @@ def main():
     eval_steps = 10
     eval_size = 30
     export_best_models = True
-    model_name = 'do02-d512-d02-eval30-2'
+    model_name = 'do04-d512-d04'
 
     # load the data
     df, imgs = load_data()

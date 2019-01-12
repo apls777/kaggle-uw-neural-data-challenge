@@ -1,5 +1,4 @@
 import csv
-
 import os
 import tensorflow as tf
 from uwndc19.dataset import load_data
@@ -10,9 +9,9 @@ from tensorflow.contrib import predictor
 def main():
     tf.logging.set_verbosity(tf.logging.INFO)
 
-    submission_num = 5
-    model_name = 'do02-d512-d02-eval30-2'
-    model_dir = root_dir('training/multiclass/experiments1/%s/export/best' % model_name)
+    submission_num = 8
+    model_name = 'do04-d512-d04'
+    model_dir = root_dir('training/multiclass/experiments1/%s/export/submission8' % model_name)
     latest_model_subdir = sorted(os.listdir(model_dir), reverse=True)[0]
     latest_model_dir = os.path.join(model_dir, latest_model_subdir)
 
