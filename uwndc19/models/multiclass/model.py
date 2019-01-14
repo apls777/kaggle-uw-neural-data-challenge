@@ -35,10 +35,10 @@ def model_fn(features, labels, mode, params):
     dense = tf.layers.dense(inputs=dropout, units=512, activation=tf.nn.relu)
     dropout = tf.layers.dropout(inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
 
-    logits = tf.layers.dense(inputs=dropout, units=18)
+    logits = tf.layers.dense(inputs=dropout, units=18, activation=tf.nn.relu)
 
     predictions = {
-        'spikes': tf.maximum(tf.constant(0, dtype=tf.float32), logits),
+        'spikes': logits,
     }
 
     if mode == tf.estimator.ModeKeys.PREDICT:

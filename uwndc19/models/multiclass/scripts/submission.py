@@ -9,8 +9,8 @@ from tensorflow.contrib import predictor
 def main():
     tf.logging.set_verbosity(tf.logging.INFO)
 
-    submission_num = 9
-    model_name = 'sn_flag-d128-do04'
+    submission_num = 10
+    model_name = 'multiclass-do04-d512-do04-relu'
     model_type = 'subnets'
 
     model_dir = root_dir('training/%s/%s/export/submission%d' % (model_type, model_name, submission_num))

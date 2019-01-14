@@ -12,7 +12,7 @@ def main():
     eval_steps = 10
     eval_size = 30
     export_best_models = True
-    model_name = 'do04-d512-d04'
+    model_name = 'multiclass-do04-d512-do04-relu'
 
     # load the data
     df, imgs = load_data()
@@ -21,7 +21,7 @@ def main():
     print('Train size: %d, eval size: %d' % (len(train_labels), len(eval_labels)))
 
     # create the estimator
-    model_dir = root_dir('training/multiclass/experiments1/%s' % model_name)
+    model_dir = root_dir('training/subnets/%s' % model_name)
 
     estimator = tf.estimator.Estimator(
         model_fn=model_fn,
