@@ -1,27 +1,12 @@
 import tensorflow as tf
 from tensorflow.contrib.estimator.python.estimator import early_stopping
-from uwndc19.dataset import load_data, get_datasets
-from uwndc19.models.multiclass.input import serving_input_receiver_fn
-from uwndc19.models.multiclass.model import model_fn
 from uwndc19.utils import root_dir
 
 
-def main():
-    tf.logging.set_verbosity(tf.logging.INFO)
-
-    eval_steps = 10
-    eval_size = 30
-    export_best_models = True
-    model_name = 'multiclass-do04-d512-do04-relu'
-
-    # load the data
-    df, imgs = load_data()
-    train_imgs, train_labels, train_nan_mask, eval_imgs, eval_labels, eval_nan_mask = get_datasets(df, imgs, eval_size)
-
-    print('Train size: %d, eval size: %d' % (len(train_labels), len(eval_labels)))
-
-    # create the estimator
-    model_dir = root_dir('training/subnets/%s' % model_name)
+def train(model_fn, train_input_fn, eval_input_fn, serving_input_receiver_fn, config):
+    model_dir = root_dir(config['data']['model_dir'])
+    eval_steps = config['training']['eval_steps']
+    export_best_models = config['training']['export_best_models']
 
     estimator = tf.estimator.Estimator(
         model_fn=model_fn,
@@ -30,23 +15,9 @@ def main():
             save_checkpoints_steps=eval_steps,
             save_summary_steps=eval_steps,
             keep_checkpoint_max=3,
-        )
+        ),
+        params=config,
     )
-
-    # training input function
-    train_data = {
-        'image': train_imgs,
-        'nan_mask': train_nan_mask,
-    }
-    train_input_fn = tf.estimator.inputs.numpy_input_fn(x=train_data, y=train_labels,
-                                                        batch_size=len(train_labels), num_epochs=None, shuffle=True)
-    # evaluation training function
-    eval_data = {
-        'image': eval_imgs,
-        'nan_mask': eval_nan_mask,
-    }
-    eval_input_fn = tf.estimator.inputs.numpy_input_fn(x=eval_data, y=eval_labels,
-                                                       batch_size=len(eval_labels), num_epochs=1, shuffle=False)
 
     # hooks
     early_stopping_hook = early_stopping.stop_if_no_decrease_hook(estimator, 'rmse', eval_steps * 10,
@@ -66,7 +37,3 @@ def main():
                                       throttle_secs=0)
 
     tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
-
-
-if __name__ == '__main__':
-    main()

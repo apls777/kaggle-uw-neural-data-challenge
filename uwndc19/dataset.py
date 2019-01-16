@@ -10,8 +10,9 @@ def load_data():
     return df, imgs
 
 
-def get_datasets(df, imgs, eval_size):
-    imgs = imgs[50:, 16:-16, 16:-16]
+def get_train_datasets(df, imgs, eval_size, image_size=None):
+    crop = ((80 - image_size) // 2) if image_size else 0
+    imgs = imgs[50:, crop:-crop, crop:-crop] if crop else imgs[50:]
 
     # get labels and the mask for NaN values
     labels = df[df.columns[1:]].values.astype(np.float32)
@@ -45,6 +46,13 @@ def get_datasets(df, imgs, eval_size):
     train_nan_mask = nan_mask[train_indices]
 
     return train_imgs, train_labels, train_nan_mask, eval_imgs, eval_labels, eval_nan_mask
+
+
+def get_test_dataset(imgs, image_size=None):
+    crop = ((80 - image_size) // 2) if image_size else 0
+    imgs = imgs[:50, crop:-crop, crop:-crop] if crop else imgs[:50]
+
+    return imgs
 
 
 def get_column_datasets(column_name, df, imgs, eval_size):

@@ -1,47 +1,24 @@
 import tensorflow as tf
 from tensorflow.python.ops.losses.losses_impl import Reduction
+from uwndc19.models.layers import build_conv_layers, build_dense_layers
 
 
 def model_fn(features, labels, mode, params):
     image = features['image']
 
-    conv1 = tf.layers.conv2d(
-        inputs=image,
-        filters=32,
-        kernel_size=[5, 5],
-        padding='same',
-        activation=tf.nn.relu)
-    pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
+    # build convolutional layers
+    conv = build_conv_layers(image, params['model']['conv_layers'])
 
-    conv2 = tf.layers.conv2d(
-        inputs=pool1,
-        filters=64,
-        kernel_size=[5, 5],
-        padding='same',
-        activation=tf.nn.relu)
-    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+    # build dense layers
+    dense = build_dense_layers(conv, params['model']['dense_layers'], params['model']['logits_dropout_rate'],
+                               mode == tf.estimator.ModeKeys.TRAIN)
 
-    conv3 = tf.layers.conv2d(
-        inputs=pool2,
-        filters=96,
-        kernel_size=[5, 5],
-        padding='same',
-        activation=tf.nn.relu)
-    pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=2)
+    # get logits
+    logits = tf.layers.dense(inputs=dense, units=params['model']['num_classes'], activation=tf.nn.relu)
 
-    flat = tf.reshape(pool3, [-1, 6 * 6 * 96])
-
-    dropout = tf.layers.dropout(inputs=flat, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
-    dense = tf.layers.dense(inputs=dropout, units=512, activation=tf.nn.relu)
-    dropout = tf.layers.dropout(inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
-
-    logits = tf.layers.dense(inputs=dropout, units=18, activation=tf.nn.relu)
-
-    predictions = {
-        'spikes': logits,
-    }
-
+    # return prediction specification
     if mode == tf.estimator.ModeKeys.PREDICT:
+        predictions = {'spikes': logits}
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # compute the loss
@@ -57,25 +34,27 @@ def model_fn(features, labels, mode, params):
     tf.summary.scalar('rmse', tf.sqrt(mse_loss))
 
     # log the training RMSE per column for the batch
-    for i in range(18):
+    for i in range(params['model']['num_classes']):
         tf.summary.scalar('rmse/column%d' % i, tf.sqrt(mse_per_column[i]))
 
+    # return training specification
     if mode == tf.estimator.ModeKeys.TRAIN:
         train_op = tf.contrib.layers.optimize_loss(
             loss=mse_loss,
             global_step=tf.train.get_global_step(),
-            learning_rate=0.001,
+            learning_rate=params['training']['learning_rate'],
             optimizer='Adam',
             summaries=['learning_rate', 'loss', 'gradients', 'gradient_norm'],
         )
         return tf.estimator.EstimatorSpec(mode=mode, loss=mse_loss, train_op=train_op)
 
+    # evaluation metrics
     eval_metric_ops = {
         'rmse': tf.metrics.root_mean_squared_error(labels=labels, predictions=logits, weights=nan_mask),
     }
 
     # RMSE per column
-    for i in range(18):
+    for i in range(params['model']['num_classes']):
         eval_metric_ops['rmse/column%d' % i] = tf.metrics.root_mean_squared_error(labels=labels[:, i],
                                                                                   predictions=logits[:, i],
                                                                                   weights=nan_mask[:, i])

@@ -20,20 +20,7 @@ def model_fn(features, labels, mode, params):
         activation=tf.nn.relu)
     pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
 
-    # conv3 = tf.layers.conv2d(
-    #     inputs=pool2,
-    #     filters=128,
-    #     kernel_size=[3, 3],
-    #     padding='same',
-    #     activation=tf.nn.relu)
-    # pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=2)
-    # flat = tf.reshape(pool3, [-1, 6 * 6 * 128])
-
     flat = tf.reshape(pool2, [-1, 12 * 12 * 64])
-
-    # dense = tf.layers.dense(inputs=flat, units=1024, activation=tf.nn.relu)
-    # dropout = tf.layers.dropout(inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
-    # logits = tf.layers.dense(inputs=dropout, units=1)
 
     logits = tf.layers.dense(inputs=flat, units=1)
     logits = tf.reshape(logits, shape=(-1,))
