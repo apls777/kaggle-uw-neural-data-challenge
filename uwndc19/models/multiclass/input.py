@@ -2,11 +2,13 @@ import tensorflow as tf
 
 
 def build_serving_input_receiver_fn(image_size: int):
-    receiver_tensors = {
-        'image': tf.placeholder(tf.float32, [None, image_size, image_size, 3], name='ph_image'),
-    }
+    def serving_input_receiver_fn():
+        receiver_tensors = {
+            'image': tf.placeholder(tf.float32, [None, image_size, image_size, 3], name='ph_image'),
+        }
+        return tf.estimator.export.ServingInputReceiver(receiver_tensors, receiver_tensors)
 
-    return lambda: tf.estimator.export.ServingInputReceiver(receiver_tensors, receiver_tensors)
+    return serving_input_receiver_fn
 
 
 def build_input_fn(imgs, labels, nan_mask, num_epochs=None, shuffle=True):
