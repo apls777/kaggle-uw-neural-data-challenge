@@ -1,10 +1,8 @@
 import tensorflow as tf
 from tensorflow.contrib.estimator.python.estimator import early_stopping
-from uwndc19.utils import root_dir
 
 
-def train(model_fn, train_input_fn, eval_input_fn, serving_input_receiver_fn, config):
-    model_dir = root_dir(config['data']['model_dir'])
+def train(model_dir, model_fn, train_input_fn, eval_input_fn, serving_input_receiver_fn, config):
     eval_steps = config['training']['eval_steps']
     export_best_models = config['training']['export_best_models']
 
@@ -14,7 +12,7 @@ def train(model_fn, train_input_fn, eval_input_fn, serving_input_receiver_fn, co
             model_dir=model_dir,
             save_checkpoints_steps=eval_steps,
             save_summary_steps=eval_steps,
-            keep_checkpoint_max=3,
+            keep_checkpoint_max=config['training']['keep_checkpoint_max'],
         ),
         params=config,
     )
@@ -24,7 +22,7 @@ def train(model_fn, train_input_fn, eval_input_fn, serving_input_receiver_fn, co
                                                                   run_every_secs=None, run_every_steps=eval_steps)
     exporter = tf.estimator.BestExporter(name='best',
                                          serving_input_receiver_fn=serving_input_receiver_fn,
-                                         exports_to_keep=3,
+                                         exports_to_keep=config['training']['exports_to_keep'],
                                          compare_fn=lambda best_eval_result, current_eval_result:
                                              # should be "<=" to export the best model on the 1st evaluation
                                              current_eval_result['rmse'] <= best_eval_result['rmse'],

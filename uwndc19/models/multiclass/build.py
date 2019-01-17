@@ -13,7 +13,7 @@ def build_fn(config: dict):
 
     # build input functions
     train_input_fn = build_train_input_fn(train_imgs, train_labels, train_nan_mask)
-    eval_input_fn = build_eval_input_fn(eval_imgs, train_labels, train_nan_mask)
+    eval_input_fn = build_eval_input_fn(eval_imgs, eval_labels, eval_nan_mask)
     serving_input_receiver_fn = build_serving_input_receiver_fn(config['model']['image_size'])
 
     return model_fn, train_input_fn, eval_input_fn, serving_input_receiver_fn

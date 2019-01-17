@@ -11,14 +11,14 @@ def main():
     tf.logging.set_verbosity(tf.logging.INFO)
 
     submission_num = 12
-    model_name = '80px-valid-do04-d512-do04-3'
+    model_name = '80px-valid-do04-d512-do04'
     model_type = 'multiclass'
 
     # load model config
     config = read_config(model_type, model_name)
 
     # find the latest version of the model
-    export_model_dir = root_dir('training/%s/%s/export/submission%d' % (model_type, model_name, submission_num))
+    export_model_dir = root_dir(os.path.join(config['data']['model_dir'], 'export', 'submission%d' % submission_num))
     latest_model_subdir = sorted(os.listdir(export_model_dir), reverse=True)[0]
     latest_model_dir = os.path.join(export_model_dir, latest_model_subdir)
 

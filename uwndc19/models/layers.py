@@ -18,11 +18,11 @@ def build_conv_layers(input_tensor, conv_layers_params):
     return flat
 
 
-def build_dense_layers(input_tensor, dense_layers_params: list, logits_dropout_rate, is_training):
+def build_dense_layers(input_tensor, dense_layers_params: list, is_training):
     for layer_params in dense_layers_params:
-        input_tensor = tf.layers.dropout(inputs=input_tensor, rate=layer_params['dropout_rate'], training=is_training)
+        dropout_rate = layer_params.get('dropout_rate', 0)
+        if dropout_rate:
+            input_tensor = tf.layers.dropout(inputs=input_tensor, rate=dropout_rate, training=is_training)
         input_tensor = tf.layers.dense(inputs=input_tensor, units=layer_params['num_units'], activation=tf.nn.relu)
 
-    dropout = tf.layers.dropout(inputs=input_tensor, rate=logits_dropout_rate, training=is_training)
-
-    return dropout
+    return input_tensor
