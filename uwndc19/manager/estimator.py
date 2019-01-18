@@ -1,8 +1,9 @@
 import tensorflow as tf
+from tensorflow.contrib.estimator import InMemoryEvaluatorHook
 from tensorflow.contrib.estimator.python.estimator import early_stopping
 
 
-def train(model_dir, model_fn, train_input_fn, eval_input_fn, serving_input_receiver_fn, config):
+def train(model_fn, train_input_fn, eval_input_fn, serving_input_receiver_fn, config, model_dir):
     eval_steps = config['training']['eval_steps']
     export_best_models = config['training']['export_best_models']
 
@@ -27,9 +28,11 @@ def train(model_dir, model_fn, train_input_fn, eval_input_fn, serving_input_rece
                                              # should be "<=" to export the best model on the 1st evaluation
                                              current_eval_result['rmse'] <= best_eval_result['rmse'],
                                          )
+    train_evaluator = InMemoryEvaluatorHook(estimator, train_input_fn, name='train', steps=1,
+                                            every_n_iter=eval_steps)
 
     # train and evaluate
-    train_spec = tf.estimator.TrainSpec(input_fn=train_input_fn, hooks=[early_stopping_hook])
+    train_spec = tf.estimator.TrainSpec(input_fn=train_input_fn, hooks=[early_stopping_hook, train_evaluator])
     eval_spec = tf.estimator.EvalSpec(input_fn=eval_input_fn,
                                       exporters=(exporter if export_best_models else None),
                                       throttle_secs=0)

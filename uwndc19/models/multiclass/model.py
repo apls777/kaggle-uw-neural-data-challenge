@@ -47,18 +47,6 @@ def model_fn(features, labels, mode, params):
     nan_mask = tf.cast(features['nan_mask'], tf.float32)
     mse_loss = tf.losses.mean_squared_error(labels=labels, predictions=logits, weights=nan_mask)
 
-    # compute MSE per column
-    mse_losses = tf.losses.mean_squared_error(labels=labels, predictions=logits, weights=nan_mask,
-                                              reduction=Reduction.NONE)
-    mse_per_column = [tf.reduce_sum(mse_losses[:, i]) / tf.reduce_sum(nan_mask[:, i]) for i in range(num_classes)]
-
-    # log the training RMSE for the batch
-    tf.summary.scalar('rmse', tf.sqrt(mse_loss))
-
-    # log the training RMSE per column for the batch
-    for i in range(num_classes):
-        tf.summary.scalar('rmse/column%d' % i, tf.sqrt(mse_per_column[i]))
-
     # return training specification
     if mode == tf.estimator.ModeKeys.TRAIN:
         train_op = tf.contrib.layers.optimize_loss(
