@@ -1,5 +1,4 @@
 import tensorflow as tf
-from tensorflow.python.ops.losses.losses_impl import Reduction
 from uwndc19.models.layers import build_conv_layers, build_dense_layers
 
 

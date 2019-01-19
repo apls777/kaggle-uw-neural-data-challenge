@@ -48,6 +48,37 @@ def get_train_datasets(df, imgs, eval_size, image_size=None):
     return train_imgs, train_labels, train_nan_mask, eval_imgs, eval_labels, eval_nan_mask
 
 
+def get_neuron_train_datasets(df, imgs, eval_size, image_size=None):
+    crop = ((80 - image_size) // 2) if image_size else 0
+    imgs = imgs[50:, crop:-crop, crop:-crop] if crop else imgs[50:]
+
+    # get labels and the mask for NaN values
+    labels = df[df.columns[1:]].values.astype(np.float32)
+
+    # shuffle the dataset
+    perm = np.random.RandomState(seed=112233).permutation(len(labels))
+    imgs = imgs[perm]
+    labels = labels[perm]
+
+    # get indices for training and evaluations datasets
+    # make sure that evaluation example have values in all columns
+    example_has_all_values = np.all(np.logical_not(np.isnan(labels)), axis=-1)
+    all_values_example_indices = np.argwhere(example_has_all_values)
+    eval_indices = all_values_example_indices[:eval_size].reshape(-1)
+    train_indices = np.concatenate([all_values_example_indices[eval_size:],
+                                    np.argwhere(np.logical_not(example_has_all_values))]).reshape(-1)
+
+    # evaluation dataset
+    eval_imgs = imgs[eval_indices]
+    eval_labels = labels[eval_indices]
+
+    # training dataset
+    train_imgs = imgs[train_indices]
+    train_labels = labels[train_indices]
+
+    return train_imgs, train_labels, eval_imgs, eval_labels
+
+
 def get_test_dataset(imgs, image_size=None):
     crop = ((80 - image_size) // 2) if image_size else 0
     imgs = imgs[:50, crop:-crop, crop:-crop] if crop else imgs[:50]
