@@ -15,12 +15,12 @@ def model_fn(features, labels, mode, params):
     dense = build_dense_layers(conv, params['model']['dense_layers'], is_training)  # [batch_size, units]
 
     # get neurons embeddings
-    neuron_embeddings = tf.get_variable('neuron_embeddings', shape=(num_classes, dense.get_shape()[-1]),
+    neuron_embeddings = tf.get_variable('neuron_embeddings', shape=(num_classes, dense.get_shape()[-1] + 1),
                                         dtype=tf.float32)
-    neurons_batch = tf.nn.embedding_lookup(neuron_embeddings, neuron_id)  # [batch_size, units]
+    neurons_batch = tf.nn.embedding_lookup(neuron_embeddings, neuron_id)  # [batch_size, units + 1]
 
     # get predictions
-    logits = tf.nn.relu(tf.reduce_sum(dense * neurons_batch, axis=-1))  # [batch_size]
+    logits = tf.nn.relu(tf.reduce_sum(dense * neurons_batch[:, :-1], axis=-1) + neurons_batch[:, -1])  # [batch_size]
 
     if mode == tf.estimator.ModeKeys.PREDICT:
         return tf.estimator.EstimatorSpec(mode=mode, predictions={'spikes': logits})

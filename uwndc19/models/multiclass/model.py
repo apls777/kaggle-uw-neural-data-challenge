@@ -39,8 +39,7 @@ def model_fn(features, labels, mode, params):
 
     # return prediction specification
     if mode == tf.estimator.ModeKeys.PREDICT:
-        predictions = {'spikes': logits}
-        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+        return tf.estimator.EstimatorSpec(mode=mode, predictions={'spikes': logits})
 
     # compute the loss
     nan_mask = tf.cast(features['nan_mask'], tf.float32)
