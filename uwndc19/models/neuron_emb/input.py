@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+from uwndc19.dataset import RANDOM_SEED
 
 
 def build_serving_input_receiver_fn(image_size: int):
@@ -25,7 +26,7 @@ def build_input_fn(imgs, labels, batch_size=None, num_epochs=None, shuffle=False
                 new_imgs.append(img)
                 new_labels.append(spike)
 
-    perm = np.random.RandomState(seed=112233).permutation(len(new_labels))
+    perm = np.random.RandomState(seed=RANDOM_SEED).permutation(len(new_labels))
 
     new_imgs = np.array(new_imgs, dtype=np.float32)[perm]
     neuron_ids = np.array(neuron_ids, dtype=np.int32)[perm]

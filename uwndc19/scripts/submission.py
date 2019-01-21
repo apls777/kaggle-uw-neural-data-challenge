@@ -22,7 +22,7 @@ def main():
 
     # create the predictor
     model_manager = ModelManager(model_type, model_name)
-    export_dir = root_dir(os.path.join('export', 'submission%d' % submission_num))
+    export_dir = os.path.join('export', 'submission%d' % submission_num)
     predict_fn = model_manager.get_predictor(export_dir)
 
     # get predictions

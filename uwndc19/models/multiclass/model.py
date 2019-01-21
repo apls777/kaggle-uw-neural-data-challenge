@@ -1,5 +1,6 @@
 import tensorflow as tf
 from uwndc19.models.layers import build_conv_layers, build_dense_layers
+from uwndc19.utils import root_dir
 
 
 def model_fn(features, labels, mode, params):
@@ -9,6 +10,20 @@ def model_fn(features, labels, mode, params):
 
     # build convolutional layers
     conv = build_conv_layers(image, params['model']['conv_layers'])
+
+    # load convolutional and dense layers from a checkpoint
+    freeze_variables = {}
+    checkpoint_path = params['training'].get('checkpoint_path')
+    freeze_restored_variables = params['training'].get('freeze_restored_variables', False)
+    if checkpoint_path:
+        tvars = tf.trainable_variables()
+        assignment_map = {}
+        for var in tvars:
+            assignment_map[var.name[:-2]] = var
+            if freeze_restored_variables:
+                freeze_variables[var.name] = True
+
+        tf.train.init_from_checkpoint(root_dir(checkpoint_path), assignment_map)
 
     # build dense layers
     dense = build_dense_layers(conv, params['model']['dense_layers'], is_training)
@@ -45,6 +60,9 @@ def model_fn(features, labels, mode, params):
     nan_mask = tf.cast(features['nan_mask'], tf.float32)
     mse_loss = tf.losses.mean_squared_error(labels=labels, predictions=logits, weights=nan_mask)
 
+    # get train variables
+    train_vars = [var for var in tf.trainable_variables() if var.name not in freeze_variables]
+
     # return training specification
     if mode == tf.estimator.ModeKeys.TRAIN:
         train_op = tf.contrib.layers.optimize_loss(
@@ -53,6 +71,7 @@ def model_fn(features, labels, mode, params):
             learning_rate=params['training']['learning_rate'],
             optimizer='Adam',
             summaries=['learning_rate', 'loss', 'gradients', 'gradient_norm'],
+            variables=train_vars,
         )
         return tf.estimator.EstimatorSpec(mode=mode, loss=mse_loss, train_op=train_op)
 

@@ -29,7 +29,7 @@ class ModelManager(object):
 
     def get_predictor(self, export_dir):
         # find the latest version of the model
-        export_model_dir = root_dir(os.path.join(self._model_dir, export_dir))
+        export_model_dir = os.path.join(self._model_dir, export_dir)
         latest_model_subdir = sorted(os.listdir(export_model_dir), reverse=True)[0]
         latest_model_dir = os.path.join(export_model_dir, latest_model_subdir)
 
