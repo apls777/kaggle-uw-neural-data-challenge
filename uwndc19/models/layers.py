@@ -23,6 +23,13 @@ def build_dense_layers(input_tensor, dense_layers_params: list, is_training):
         dropout_rate = layer_params.get('dropout_rate', 0)
         if dropout_rate:
             input_tensor = tf.layers.dropout(inputs=input_tensor, rate=dropout_rate, training=is_training)
-        input_tensor = tf.layers.dense(inputs=input_tensor, units=layer_params['num_units'], activation=tf.nn.relu)
+
+        l2_regularization = layer_params.get('l2_regularization', 0)
+        kernel_regularizer = None
+        if l2_regularization:
+            kernel_regularizer = tf.contrib.layers.l2_regularizer(scale=l2_regularization)
+
+        input_tensor = tf.layers.dense(inputs=input_tensor, units=layer_params['num_units'], activation=tf.nn.relu,
+                                       kernel_regularizer=kernel_regularizer)
 
     return input_tensor

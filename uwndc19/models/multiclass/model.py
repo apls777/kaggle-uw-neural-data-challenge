@@ -59,6 +59,7 @@ def model_fn(features, labels, mode, params):
     # compute the loss
     nan_mask = tf.cast(features['nan_mask'], tf.float32)
     mse_loss = tf.losses.mean_squared_error(labels=labels, predictions=logits, weights=nan_mask)
+    loss = mse_loss + tf.losses.get_regularization_loss()
 
     # get train variables
     train_vars = [var for var in tf.trainable_variables() if var.name not in freeze_variables]
@@ -66,14 +67,14 @@ def model_fn(features, labels, mode, params):
     # return training specification
     if mode == tf.estimator.ModeKeys.TRAIN:
         train_op = tf.contrib.layers.optimize_loss(
-            loss=mse_loss,
+            loss=loss,
             global_step=tf.train.get_global_step(),
             learning_rate=params['training']['learning_rate'],
             optimizer='Adam',
             summaries=['learning_rate', 'loss', 'gradients', 'gradient_norm'],
             variables=train_vars,
         )
-        return tf.estimator.EstimatorSpec(mode=mode, loss=mse_loss, train_op=train_op)
+        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
     # evaluation metrics
     eval_metric_ops = {
@@ -86,4 +87,4 @@ def model_fn(features, labels, mode, params):
                                                                                   predictions=logits[:, i],
                                                                                   weights=nan_mask[:, i])
 
-    return tf.estimator.EstimatorSpec(mode=mode, loss=mse_loss, eval_metric_ops=eval_metric_ops)
+    return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)

@@ -10,8 +10,8 @@ from uwndc19.utils import root_dir
 def main():
     tf.logging.set_verbosity(tf.logging.INFO)
 
-    submission_num = 13
-    model_name = 'do04-d512-do04-sub-d128-do04'
+    submission_num = 18
+    model_name = '4conv-do04-d512-do04-l2'
     model_type = 'multiclass'
 
     # load the data
