@@ -1,6 +1,6 @@
 import tensorflow as tf
 from uwndc19.models.layers import build_conv_layers, build_dense_layers
-from uwndc19.utils import root_dir
+from uwndc19.core.utils import root_dir
 
 
 def model_fn(features, labels, mode, params):

@@ -3,7 +3,7 @@ from tensorflow.contrib.estimator.python.estimator import early_stopping
 from uwndc19.dataset import load_data, get_column_datasets
 from uwndc19.models.single_column.input import serving_input_receiver_fn
 from uwndc19.models.single_column.model import model_fn
-from uwndc19.utils import root_dir
+from uwndc19.core.utils import root_dir
 
 
 def main():

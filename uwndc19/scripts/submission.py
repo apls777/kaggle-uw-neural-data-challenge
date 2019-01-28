@@ -4,7 +4,7 @@ import tensorflow as tf
 from uwndc19.core.config import get_model_config
 from uwndc19.core.estimator import get_predictor
 from uwndc19.dataset import load_data, get_test_dataset
-from uwndc19.utils import root_dir
+from uwndc19.core.utils import root_dir
 
 
 def main():

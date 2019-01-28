@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
-from uwndc19.utils import root_dir
-
+from uwndc19.core.utils import root_dir
 
 RANDOM_SEED = 112233
 

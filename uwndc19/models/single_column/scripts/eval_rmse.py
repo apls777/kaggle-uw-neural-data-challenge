@@ -1,6 +1,6 @@
 import os
 from tensorflow.contrib.estimator import read_eval_metrics
-from uwndc19.utils import root_dir
+from uwndc19.core.utils import root_dir
 
 
 def main(use_best_value: bool):
