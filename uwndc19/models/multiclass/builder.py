@@ -1,5 +1,5 @@
+from ...core.abstract_builder import AbstractBuilder
 from uwndc19.dataset import get_train_datasets, load_data
-from uwndc19.manager.abstract_builder import AbstractBuilder
 from uwndc19.models.multiclass.input import build_input_fn, build_serving_input_receiver_fn
 from uwndc19.models.multiclass.model import model_fn
 import numpy as np

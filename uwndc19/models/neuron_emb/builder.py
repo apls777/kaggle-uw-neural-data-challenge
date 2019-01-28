@@ -1,5 +1,5 @@
-from uwndc19.dataset import load_data, get_neuron_train_datasets
-from uwndc19.manager.abstract_builder import AbstractBuilder
+from ...core.abstract_builder import AbstractBuilder
+from uwndc19.dataset import load_data, get_train_datasets
 from uwndc19.models.neuron_emb.input import build_input_fn, build_serving_input_receiver_fn
 from uwndc19.models.neuron_emb.model import model_fn
 
@@ -12,7 +12,7 @@ class Builder(AbstractBuilder):
         # load the data
         df, imgs = load_data()
         train_imgs, train_labels, eval_imgs, eval_labels = \
-            get_neuron_train_datasets(df, imgs, config['data']['eval_size'], config['model']['image_size'])
+            get_train_datasets(df, imgs, config['data']['eval_size'], config['model']['image_size'])
 
         # build input functions
         batch_size = config['training'].get('batch_size')

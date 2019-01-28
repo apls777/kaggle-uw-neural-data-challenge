@@ -6,6 +6,10 @@ class AbstractBuilder(ABC):
     def __init__(self, config: dict):
         self._config = config
 
+    @property
+    def config(self):
+        return self._config
+
     @abstractmethod
     def build_model_fn(self):
         raise NotImplementedError

@@ -1,9 +1,9 @@
 import csv
 import os
 import tensorflow as tf
+from uwndc19.core.config import get_model_config
+from uwndc19.core.estimator import get_predictor
 from uwndc19.dataset import load_data, get_test_dataset
-from uwndc19.manager.config import read_config
-from uwndc19.manager.model_manager import ModelManager
 from uwndc19.utils import root_dir
 
 
@@ -11,19 +11,18 @@ def main():
     tf.logging.set_verbosity(tf.logging.INFO)
 
     submission_num = 18
-    model_name = '4conv-do04-d512-do04-l2'
+    model_dir = 'training/multiclass/4conv-do04-d512-do04-l2'
     model_type = 'multiclass'
 
     # load the data
     df, stim = load_data()
     columns = list(df.columns)[1:]
-    config = read_config(model_type, model_name)
+    config = get_model_config(model_dir)
     test_data = {'image': get_test_dataset(stim, config['model']['image_size'])}
 
     # create the predictor
-    model_manager = ModelManager(model_type, model_name)
-    export_dir = os.path.join('export', 'submission%d' % submission_num)
-    predict_fn = model_manager.get_predictor(export_dir)
+    export_dir = root_dir(os.path.join(model_dir, 'export', 'submission%d' % submission_num))
+    predict_fn = get_predictor(export_dir)
 
     # get predictions
     predictions = predict_fn(test_data)['spikes']
