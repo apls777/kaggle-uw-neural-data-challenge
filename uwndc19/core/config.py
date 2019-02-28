@@ -26,6 +26,7 @@ def get_model_config(model_dir: str):
 
 def create_model_config(model_dir: str, config_path: str = None):
     """Creates a new configuration file in the model directory."""
+    model_dir = root_dir(model_dir)
     model_config_path = get_model_config_path(model_dir)
 
     # read the config file
@@ -39,7 +40,7 @@ def create_model_config(model_dir: str, config_path: str = None):
         file_io.rename(model_config_path, prev_config_filename)
         logging.info('Previous model config file was renamed: %s' % prev_config_filename)
 
-    # save config file to the model directory
+    # save the config file to the model directory
     if not is_s3_path(model_dir):
         os.makedirs(model_dir, exist_ok=True)
     file_io.write_string_to_file(model_config_path, train_config_content)
