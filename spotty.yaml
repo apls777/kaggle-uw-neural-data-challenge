@@ -1,0 +1,42 @@
+project:
+  name: hyperparams-optimization
+  syncFilters:
+    - exclude:
+      - .git/*
+      - .idea/*
+      - '*/__pycache__/*'
+      - data/*
+      - training/*
+    - include:
+      - data/train.csv
+      - data/stim.npy
+
+container:
+  projectDir: /workspace/project
+  image: tensorflow/tensorflow:1.12.0-gpu-py3
+  ports: [6006, 6007, 8888]
+  volumeMounts:
+    - name: workspace
+      mountPath: /workspace
+  commands: |
+    pip install -r requirements.txt
+  runtimeParameters: ['--shm-size', '20G']
+
+instances:
+  - name: i1
+    provider: aws
+    parameters:
+      region: us-east-2
+      instanceType: p2.xlarge
+      volumes:
+        - name: workspace
+          parameters:
+            size: 50
+
+scripts:
+  tune: |
+    PYTHONPATH=. python uwndc19/scripts/tune.py
+  tensorboard: |
+    tensorboard --logdir training/multiclass/hp_tuning/{{EXPERIMENT}}/ray_results/{{EXPERIMENT}}
+  jupyter: |
+    jupyter notebook --allow-root --notebook-dir=/workspace/project

@@ -2,7 +2,7 @@ from functools import reduce
 import tensorflow as tf
 
 
-def build_conv_layers(input_tensor, conv_layers_params):
+def build_conv_layers(input_tensor, conv_layers_params: list):
     for layer_params in conv_layers_params:
         input_tensor = tf.layers.conv2d(
             inputs=input_tensor,
@@ -18,7 +18,7 @@ def build_conv_layers(input_tensor, conv_layers_params):
     return flat
 
 
-def build_dense_layers(input_tensor, dense_layers_params: list, is_training):
+def build_dense_layers(input_tensor, dense_layers_params: list, is_training: bool):
     for layer_params in dense_layers_params:
         dropout_rate = layer_params.get('dropout_rate', 0)
         if dropout_rate:

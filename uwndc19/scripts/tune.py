@@ -11,9 +11,13 @@ from uwndc19.hp_tuning.mutations import get_mutations, mutate_config, generate_m
 
 
 def tune_hyperparameters(model_type: str, experiment_name: str):
-    ray.init(ignore_reinit_error=True)
+    ray_num_cpus = 4
+    num_cpus_per_process = 1
+    num_gpus_per_process = 0.3
 
-    tuning_config_dir = root_dir('configs/%s/hp_tuning/%s' % (model_type, experiment_name))
+    ray.init(num_cpus=ray_num_cpus, ignore_reinit_error=True, include_webui=False)
+
+    tuning_config_dir = root_dir('configs/%s/hp_tuning' % model_type)
     models_dir = root_dir('training/%s/hp_tuning/%s' % (model_type, experiment_name))
 
     # read the base config
@@ -27,9 +31,15 @@ def tune_hyperparameters(model_type: str, experiment_name: str):
     # get mutated configs
     mutations = get_mutations(mutations_grid)
 
+    # use only fraction of GPU
+    session_config = None
+    if num_gpus_per_process < 1:
+        session_config = tf.ConfigProto()
+        session_config.gpu_options.per_process_gpu_memory_fraction = num_gpus_per_process
+
     def tune_fn(tune_config, reporter):
         model_builder = create_builder(model_type, tune_config['config'])
-        train(model_builder, tune_config['model_dir'], reporter)
+        train(model_builder, tune_config['model_dir'], reporter, session_config)
 
     configuration = tune.Experiment(
         experiment_name,
@@ -43,12 +53,12 @@ def tune_hyperparameters(model_type: str, experiment_name: str):
         },
         trial_name_creator=tune.function(lambda trial: generate_mutation_name(trial.config['mutation'])),
         resources_per_trial={
-            'cpu': 1,
-            # 'gpu': 0.2,
+            'cpu': num_cpus_per_process,
+            'gpu': num_gpus_per_process,
         },
     )
 
-    tune.run_experiments(configuration, resume=True)
+    tune.run_experiments(configuration, resume=False, with_server=False)
 
 
 def main():
@@ -56,7 +66,7 @@ def main():
     tf_logging._get_logger().propagate = False  # fix double messages
 
     model_type = 'multiclass'
-    experiment_name = 'hp_tuning_2'
+    experiment_name = 'tuning_5'
 
     tune_hyperparameters(model_type, experiment_name)
 

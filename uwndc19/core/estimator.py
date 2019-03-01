@@ -8,7 +8,7 @@ from .utils import root_dir
 from .abstract_builder import AbstractBuilder
 
 
-def train(builder: AbstractBuilder, model_dir: str, reporter=None):
+def train(builder: AbstractBuilder, model_dir: str, reporter=None, session_config=None):
     config = builder.config
     model_dir = root_dir(model_dir)
 
@@ -20,6 +20,7 @@ def train(builder: AbstractBuilder, model_dir: str, reporter=None):
         model_fn=builder.build_model_fn(),
         config=tf.estimator.RunConfig(
             model_dir=model_dir,
+            session_config=session_config,
             save_checkpoints_steps=eval_steps,
             save_summary_steps=eval_steps,
             keep_checkpoint_max=config['training']['keep_checkpoint_max'],

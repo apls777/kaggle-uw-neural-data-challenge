@@ -4,14 +4,12 @@ from typing import Tuple
 import uwndc19.hp_tuning.mutation_funcs
 
 
-def get_mutations(mutations_grid: list):
+def get_mutations(mutations_config: dict):
     mutations = []
-    for mutation_grid in mutations_grid:
-        func_name = list(mutation_grid.keys())[0]
-        params_grid = mutation_grid[func_name]
-
-        for params in ParameterGrid(params_grid):
-            mutations.append((func_name, params))
+    for func_name, params_grids in mutations_config.items():
+        for params_grid in params_grids:
+            for params in ParameterGrid(params_grid):
+                mutations.append((func_name, params))
 
     Random(123).shuffle(mutations)
 
