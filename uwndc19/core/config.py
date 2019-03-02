@@ -15,24 +15,10 @@ def get_model_config_path(model_dir: str):
     return model_config_path
 
 
-def get_model_config(model_dir: str):
-    """Reads an existing model configuration."""
-    model_config_path = get_model_config_path(model_dir)
-    model_config_content = file_io.read_file_to_string(model_config_path)
-    config = yaml.load(model_config_content)
-
-    return config
-
-
-def create_model_config(model_dir: str, config_path: str = None):
-    """Creates a new configuration file in the model directory."""
+def write_model_config(model_dir: str, config_str: str):
+    """Writes the config to the model's directory."""
     model_dir = root_dir(model_dir)
     model_config_path = get_model_config_path(model_dir)
-
-    # read the config file
-    train_config_path = root_dir(config_path)
-    train_config_content = file_io.read_file_to_string(train_config_path)
-    config = yaml.load(train_config_content)
 
     # if the model config file already exists, rename it
     if file_io.file_exists(model_config_path):
@@ -43,6 +29,28 @@ def create_model_config(model_dir: str, config_path: str = None):
     # save the config file to the model directory
     if not is_s3_path(model_dir):
         os.makedirs(model_dir, exist_ok=True)
-    file_io.write_string_to_file(model_config_path, train_config_content)
+    file_io.write_string_to_file(model_config_path, config_str)
+
+
+def load_model_config(model_dir: str):
+    """Loads a config from the model's directory."""
+    config_path = get_model_config_path(model_dir)
+    config_content = file_io.read_file_to_string(config_path)
+    config = yaml.safe_load(config_content)
+
+    return config
+
+
+def create_model_config(model_dir: str, config_path: str = None):
+    """Creates a new configuration file in the model directory and returns the config."""
+
+    # read the config file
+    config_content = file_io.read_file_to_string(root_dir(config_path))
+
+    # save the config file to the model directory
+    write_model_config(model_dir, config_content)
+
+    # load config
+    config = yaml.safe_load(config_content)
 
     return config

@@ -1,7 +1,7 @@
 import csv
 import os
 import tensorflow as tf
-from uwndc19.core.config import get_model_config
+from uwndc19.core.config import load_model_config
 from uwndc19.core.estimator import get_predictor
 from uwndc19.dataset import load_data, get_test_dataset
 from uwndc19.core.utils import root_dir
@@ -17,7 +17,7 @@ def main():
     # load the data
     df, stim = load_data()
     columns = list(df.columns)[1:]
-    config = get_model_config(model_dir)
+    config = load_model_config(model_dir)
     test_data = {'image': get_test_dataset(stim, config['model']['image_size'])}
 
     # create the predictor

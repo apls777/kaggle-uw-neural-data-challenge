@@ -7,6 +7,7 @@ project:
       - '*/__pycache__/*'
       - data/*
       - training/*
+      - ray_results/*
     - include:
       - data/train.csv
       - data/stim.npy
@@ -32,11 +33,34 @@ instances:
         - name: workspace
           parameters:
             size: 50
+            deletionPolicy: update_snapshot
 
 scripts:
   tune: |
-    PYTHONPATH=. python uwndc19/scripts/tune.py
-  tensorboard: |
-    tensorboard --logdir training/multiclass/hp_tuning/{{EXPERIMENT}}/ray_results/{{EXPERIMENT}}
+    if [ -n "{{EXPERIMENT}}" ]; then
+      PYTHONPATH=. python uwndc19/scripts/tune.py -g experiments1 -n {{EXPERIMENT}}
+    fi
+
+  train: |
+    if [ -n "{{MODEL_NAME}}" ]; then
+      PYTHONPATH=. python uwndc19/scripts/train.py \
+        -d training/multiclass/experiments2/{{MODEL_NAME}} \
+        -c configs/multiclass/default.yaml
+    fi
+
+  resume: |
+    if [ -n "{{MODEL_NAME}}" ]; then
+      PYTHONPATH=. python uwndc19/scripts/train.py -d training/multiclass/experiments2/{{MODEL_NAME}}
+    fi
+
+  ray-tensorboard: |
+    tensorboard --logdir ray_results/experiments1 --port 6007
+
+  remove-experiment: |
+    if [ -n "{{EXPERIMENT}}" ]; then
+      rm -Rf training/multiclass/hp_tuning/experiments1/{{EXPERIMENT}}/*
+      rm -Rf ray_results/experiments1/{{EXPERIMENT}}/*
+    fi
+
   jupyter: |
     jupyter notebook --allow-root --notebook-dir=/workspace/project
