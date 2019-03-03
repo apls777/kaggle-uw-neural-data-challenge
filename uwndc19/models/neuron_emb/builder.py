@@ -1,5 +1,5 @@
 from ...core.abstract_builder import AbstractBuilder
-from uwndc19.dataset import load_data, get_train_datasets
+from uwndc19.helpers.dataset import load_data, get_train_datasets
 from uwndc19.models.neuron_emb.input import build_input_fn, build_serving_input_receiver_fn
 from uwndc19.models.neuron_emb.model import model_fn
 

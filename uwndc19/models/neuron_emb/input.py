@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from uwndc19.dataset import RANDOM_SEED
+from uwndc19.helpers.dataset import RANDOM_SEED
 
 
 def build_serving_input_receiver_fn(image_size: int):

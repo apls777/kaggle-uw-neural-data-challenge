@@ -19,6 +19,10 @@ class AbstractBuilder(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def build_eval_train_input_fn(self):
+        raise NotImplementedError
+
+    @abstractmethod
     def build_eval_input_fn(self):
         raise NotImplementedError
 

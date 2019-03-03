@@ -8,7 +8,6 @@ def add_conv_layer(config: dict, num_filters: int, kernel_size: int, batch_norm:
         'num_filters': num_filters,
         'kernel_size': kernel_size,
         'padding': 'same',
-        'batch_norm': batch_norm,
     })
 
 
@@ -46,3 +45,8 @@ def change_dense_layer(config: dict, layer_id: int, num_units: int = None, dropo
 
     if l2_regularization is not None:
         config['model']['dense_layers'][layer_id]['l2_regularization'] = l2_regularization
+
+
+def change_logits_layer(config: dict, dropout_rate: float = None):
+    if dropout_rate is not None:
+        config['model']['logits_dropout_rate'] = dropout_rate

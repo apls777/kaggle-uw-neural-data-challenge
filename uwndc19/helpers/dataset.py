@@ -12,7 +12,7 @@ def load_data():
     return df, imgs
 
 
-def get_train_datasets(df, imgs, eval_size, image_size=None):
+def get_train_datasets(df, imgs, eval_size, image_size=None, random_seed=RANDOM_SEED):
     crop = ((80 - image_size) // 2) if image_size else 0
     imgs = imgs[50:, crop:-crop, crop:-crop] if crop else imgs[50:]
 
@@ -20,7 +20,7 @@ def get_train_datasets(df, imgs, eval_size, image_size=None):
     labels = df[df.columns[1:]].values.astype(np.float32)
 
     # shuffle the dataset
-    perm = np.random.RandomState(seed=RANDOM_SEED).permutation(len(labels))
+    perm = np.random.RandomState(seed=random_seed).permutation(len(labels))
     imgs = imgs[perm]
     labels = labels[perm]
 
@@ -62,7 +62,7 @@ def get_column_datasets(column_name, df, imgs, eval_size):
     imgs = imgs[filter_nans]
 
     # shuffle the dataset
-    perm = np.random.RandomState(seed=112233).permutation(len(labels))
+    perm = np.random.RandomState(seed=RANDOM_SEED).permutation(len(labels))
     labels = labels[perm]
     imgs = imgs[perm]
 

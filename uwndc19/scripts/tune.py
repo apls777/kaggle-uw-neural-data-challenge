@@ -70,7 +70,7 @@ def tune_hyperparameters(model_type: str, experiment_group: str, experiment_name
         },
     )
 
-    tune.run_experiments(configuration, resume=False, with_server=False)
+    tune.run_experiments(configuration)
 
 
 def main():

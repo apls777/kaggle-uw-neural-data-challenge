@@ -1,7 +1,7 @@
 import csv
 import os
 import tensorflow as tf
-from uwndc19.dataset import load_data
+from uwndc19.helpers.dataset import load_data
 from uwndc19.core.utils import root_dir
 from tensorflow.contrib import predictor
 

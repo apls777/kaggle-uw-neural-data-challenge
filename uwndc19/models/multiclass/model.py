@@ -56,6 +56,14 @@ def model_fn(features, labels, mode, params):
     if mode == tf.estimator.ModeKeys.PREDICT:
         return tf.estimator.EstimatorSpec(mode=mode, predictions={'spikes': logits})
 
+    # make sure that images were distorted correctly and display them in TensorBoard
+    max_images = 12
+    images = image[:max_images]
+    assert_min = tf.assert_greater_equal(tf.reduce_min(images), 0.0, message='Image contains values less than 0')
+    assert_max = tf.assert_less_equal(tf.reduce_max(images), 1.0, message='Image contains values greater than 1')
+    with tf.control_dependencies([assert_min, assert_max]):
+        tf.summary.image('images', tf.cast(images * 255, dtype=tf.uint8), max_outputs=max_images)
+
     # compute the loss
     nan_mask = tf.cast(features['nan_mask'], tf.float32)
     mse_loss = tf.losses.mean_squared_error(labels=labels, predictions=logits, weights=nan_mask)

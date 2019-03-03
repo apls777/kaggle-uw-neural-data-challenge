@@ -1,4 +1,5 @@
 import tensorflow as tf
+import uwndc19.helpers.image_distortion_funcs
 
 
 def build_serving_input_receiver_fn(image_size: int):
@@ -11,13 +12,30 @@ def build_serving_input_receiver_fn(image_size: int):
     return serving_input_receiver_fn
 
 
-def build_input_fn(imgs, labels, nan_mask, num_epochs=None):
-    features = {
-        'image': imgs,
-        'nan_mask': nan_mask,
-    }
+def build_input_fn(imgs, labels, nan_mask, distortions=None, num_epochs=None):
+    def input_fn():
+        features = {
+            'image': imgs,
+            'nan_mask': nan_mask,
+        }
 
-    # no shuffling, otherwise several epochs will be mixed together
-    return tf.estimator.inputs.numpy_input_fn(x=features, y=labels, batch_size=len(labels),
-                                              num_epochs=num_epochs, shuffle=False)
+        dataset = tf.data.Dataset.from_tensor_slices((features, labels))
+        dataset = dataset.repeat(num_epochs)
 
+        if distortions:
+            dataset = dataset.map(lambda f, l: _distort_image(f, l, distortions))
+
+        dataset = dataset.batch(len(labels))
+
+        iterator = dataset.make_one_shot_iterator()
+
+        return iterator.get_next()
+
+    return input_fn
+
+
+def _distort_image(features, labels, distortions: dict):
+    for func_name, params in distortions.items():
+        features['image'] = getattr(uwndc19.helpers.image_distortion_funcs, func_name)(features['image'], **params)
+
+    return features, labels

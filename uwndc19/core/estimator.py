@@ -29,9 +29,10 @@ def train(builder: AbstractBuilder, model_dir: str, reporter=None, session_confi
     )
 
     # hooks
-    early_stopping_hook = early_stopping.stop_if_no_decrease_hook(estimator, performance_metric, eval_steps * 10,
+    early_stopping_steps = eval_steps * config['training']['early_stopping_evals']
+    early_stopping_hook = early_stopping.stop_if_no_decrease_hook(estimator, performance_metric, early_stopping_steps,
                                                                   run_every_secs=None, run_every_steps=eval_steps)
-    train_evaluator = InMemoryEvaluatorHook(estimator, builder.build_train_input_fn(), name='train', steps=1,
+    train_evaluator = InMemoryEvaluatorHook(estimator, builder.build_eval_train_input_fn(), name='train', steps=1,
                                             every_n_iter=eval_steps)
 
     # exporters
@@ -48,6 +49,7 @@ def train(builder: AbstractBuilder, model_dir: str, reporter=None, session_confi
         exporters.append(best_exporter)
 
     if reporter:
+        # report evaluation metrics to Ray
         report_exporter = ReportExporter(reporter, [performance_metric])
         exporters.append(report_exporter)
 

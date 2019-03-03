@@ -36,16 +36,13 @@ instances:
             deletionPolicy: update_snapshot
 
 scripts:
-  tune: |
-    if [ -n "{{EXPERIMENT}}" ]; then
-      PYTHONPATH=. python uwndc19/scripts/tune.py -g experiments1 -n {{EXPERIMENT}}
-    fi
-
   train: |
     if [ -n "{{MODEL_NAME}}" ]; then
+      CONFIG={{CONFIG}}
+      CONFIG=${CONFIG:-default}
       PYTHONPATH=. python uwndc19/scripts/train.py \
         -d training/multiclass/experiments2/{{MODEL_NAME}} \
-        -c configs/multiclass/default.yaml
+        -c configs/multiclass/$CONFIG.yaml
     fi
 
   resume: |
@@ -53,8 +50,16 @@ scripts:
       PYTHONPATH=. python uwndc19/scripts/train.py -d training/multiclass/experiments2/{{MODEL_NAME}}
     fi
 
+  tune: |
+    if [ -n "{{EXPERIMENT}}" ]; then
+      PYTHONPATH=. python uwndc19/scripts/tune.py -g experiments2 -n {{EXPERIMENT}}
+    fi
+
+  tensorboard: |
+    tensorboard --logdir training/multiclass/hp_tuning/experiments2 --port 6006
+
   ray-tensorboard: |
-    tensorboard --logdir ray_results/experiments1 --port 6007
+    tensorboard --logdir ray_results/experiments2 --port 6007
 
   remove-experiment: |
     if [ -n "{{EXPERIMENT}}" ]; then
