@@ -1,6 +1,4 @@
-import os
 import tensorflow as tf
-from tensorflow.contrib import predictor
 from tensorflow.contrib.estimator import InMemoryEvaluatorHook
 from tensorflow.contrib.estimator.python.estimator import early_stopping
 from uwndc19.hp_tuning.report_exporter import ReportExporter
@@ -61,14 +59,3 @@ def train(builder: AbstractBuilder, model_dir: str, reporter=None, session_confi
                                       throttle_secs=0)
 
     tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
-
-
-def get_predictor(export_dir):
-    # find the latest version of the model
-    latest_model_subdir = sorted(os.listdir(export_dir), reverse=True)[0]
-    latest_model_dir = os.path.join(export_dir, latest_model_subdir)
-
-    # get the predictor
-    predict_fn = predictor.from_saved_model(latest_model_dir)
-
-    return predict_fn

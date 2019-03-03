@@ -67,5 +67,8 @@ scripts:
       rm -Rf ray_results/experiments1/{{EXPERIMENT}}/*
     fi
 
+  submission: |
+    PYTHONPATH=. python uwndc19/scripts/submission.py -d {{MODEL_DIR}} -n {{NUM}}
+
   jupyter: |
     jupyter notebook --allow-root --notebook-dir=/workspace/project
