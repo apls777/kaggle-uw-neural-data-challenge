@@ -35,7 +35,7 @@ def generate_submission(model_type, model_dir, submission_num):
     predictions = predict_fn(test_data)['spikes']
 
     # generate a submission file
-    with open(os.path.join(submission_dir, 'submission.csv'), 'w') as f:
+    with open(os.path.join(submission_dir, 'submission_%d.csv' % submission_num), 'w') as f:
         writer = csv.writer(f)
         writer.writerow(['Id'] + columns)
         for i in range(len(test_data['image'])):

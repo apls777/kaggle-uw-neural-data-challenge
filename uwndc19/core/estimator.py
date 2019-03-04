@@ -11,7 +11,6 @@ def train(builder: AbstractBuilder, model_dir: str, reporter=None, session_confi
     model_dir = root_dir(model_dir)
 
     eval_steps = config['training']['eval_steps']
-    export_best_models = config['training']['export_best_models']
     performance_metric = 'rmse'
 
     estimator = tf.estimator.Estimator(
@@ -26,15 +25,28 @@ def train(builder: AbstractBuilder, model_dir: str, reporter=None, session_confi
         params=config,
     )
 
-    # hooks
-    early_stopping_steps = eval_steps * config['training']['early_stopping_evals']
-    early_stopping_hook = early_stopping.stop_if_no_decrease_hook(estimator, performance_metric, early_stopping_steps,
-                                                                  run_every_secs=None, run_every_steps=eval_steps)
+    # training hooks
+    hooks = []
+
+    # early stopping hook
+    early_stopping_evals = config['training'].get('early_stopping_evals')
+    if early_stopping_evals:
+        early_stopping_steps = eval_steps * early_stopping_evals
+        early_stopping_hook = early_stopping.stop_if_no_decrease_hook(estimator, performance_metric,
+                                                                      early_stopping_steps, run_every_secs=None,
+                                                                      run_every_steps=eval_steps)
+        hooks.append(early_stopping_hook)
+
+    # in-memory evaluation on the training data
     train_evaluator = InMemoryEvaluatorHook(estimator, builder.build_eval_train_input_fn(), name='train', steps=1,
                                             every_n_iter=eval_steps)
+    hooks.append(train_evaluator)
 
-    # exporters
+    # evaluation exporters
     exporters = []
+
+    # export best models
+    export_best_models = config['training']['export_best_models']
     if export_best_models:
         best_exporter = tf.estimator.BestExporter(
             name='best',
@@ -46,14 +58,14 @@ def train(builder: AbstractBuilder, model_dir: str, reporter=None, session_confi
         )
         exporters.append(best_exporter)
 
+    # report evaluation metrics to Ray
     if reporter:
-        # report evaluation metrics to Ray
         report_exporter = ReportExporter(reporter, [performance_metric])
         exporters.append(report_exporter)
 
     # train and evaluate
     train_spec = tf.estimator.TrainSpec(input_fn=builder.build_train_input_fn(),
-                                        hooks=[early_stopping_hook, train_evaluator])
+                                        hooks=hooks)
     eval_spec = tf.estimator.EvalSpec(input_fn=builder.build_eval_input_fn(),
                                       exporters=exporters,
                                       throttle_secs=0)

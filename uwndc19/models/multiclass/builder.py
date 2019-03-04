@@ -31,7 +31,7 @@ class Builder(AbstractBuilder):
 
         # build input functions
         self._train_input_fn = build_input_fn(train_imgs, train_labels, train_nan_mask,
-                                              distortions=config['data']['distortions'], num_epochs=None)
+                                              distortions=config['data'].get('distortions'), num_epochs=None)
         self._eval_train_input_fn = build_input_fn(train_imgs, train_labels, train_nan_mask, num_epochs=None)
         self._eval_input_fn = build_input_fn(eval_imgs, eval_labels, eval_nan_mask, num_epochs=1)
         self._serving_input_receiver_fn = build_serving_input_receiver_fn(config['model']['image_size'])

@@ -56,9 +56,12 @@ scripts:
     fi
 
   tensorboard: |
-    tensorboard --logdir training/multiclass/hp_tuning/experiments2 --port 6006
+    tensorboard --logdir training/multiclass/experiments2
 
-  ray-tensorboard: |
+  tensorboard-tuning: |
+    tensorboard --logdir training/multiclass/hp_tuning/experiments2
+
+  tensorboard-ray: |
     tensorboard --logdir ray_results/experiments2 --port 6007
 
   remove-experiment: |

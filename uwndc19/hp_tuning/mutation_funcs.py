@@ -1,9 +1,4 @@
-def toggle_batch_norm(config: dict, layer_id: int):
-    batch_norm = config['model']['conv_layers'][layer_id].get('batch_norm', False)
-    config['model']['conv_layers'][layer_id]['batch_norm'] = not batch_norm
-
-
-def add_conv_layer(config: dict, num_filters: int, kernel_size: int, batch_norm: bool = False):
+def add_conv_layer(config: dict, num_filters: int, kernel_size: int):
     config['model']['conv_layers'].append({
         'num_filters': num_filters,
         'kernel_size': kernel_size,
