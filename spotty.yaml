@@ -71,7 +71,9 @@ scripts:
     fi
 
   submission: |
-    PYTHONPATH=. python uwndc19/scripts/submission.py -d {{MODEL_DIR}} -n {{NUM}}
+    if [ -n "{{MODEL_NAME}}" ]; then
+      PYTHONPATH=. python uwndc19/scripts/submission.py -d training/multiclass/experiments2/{{MODEL_NAME}} -n {{NUM}}
+    fi
 
   jupyter: |
     jupyter notebook --allow-root --notebook-dir=/workspace/project

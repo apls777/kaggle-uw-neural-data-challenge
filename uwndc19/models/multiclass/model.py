@@ -9,7 +9,7 @@ def model_fn(features, labels, mode, params):
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
     # build convolutional layers
-    conv = build_conv_layers(image, params['model']['conv_layers'])
+    conv = build_conv_layers(image, params['model']['conv_layers'], is_training)
 
     # load convolutional and dense layers from a checkpoint
     freeze_variables = {}
@@ -35,22 +35,21 @@ def model_fn(features, labels, mode, params):
         if subnet_dropout_rate:
             dense = tf.layers.dropout(inputs=dense, rate=subnet_dropout_rate, training=is_training)
 
+        logits_layer_params = dict(params['model']['logits_layer'])
+        logits_layer_params['num_units'] = 1
+
         logits_concat = []
         for i in range(num_classes):
             subnet_dense = build_dense_layers(dense, params['model']['subnet']['dense_layers'], is_training)
-            logits_dropout_rate = params['model'].get('logits_dropout_rate', 0)
-            if logits_dropout_rate:
-                subnet_dense = tf.layers.dropout(inputs=subnet_dense, rate=logits_dropout_rate, training=is_training)
-            subnet_logits = tf.layers.dense(inputs=subnet_dense, units=1, activation=tf.nn.relu)
+            subnet_logits = build_dense_layers(subnet_dense, [logits_layer_params], is_training)
             logits_concat.append(subnet_logits)
 
         logits = tf.concat(logits_concat, axis=-1)
     else:
         # a single layer to get a spike
-        logits_dropout_rate = params['model'].get('logits_dropout_rate', 0)
-        if logits_dropout_rate:
-            dense = tf.layers.dropout(inputs=dense, rate=logits_dropout_rate, training=is_training)
-        logits = tf.layers.dense(inputs=dense, units=num_classes, activation=tf.nn.relu)
+        logits_layer_params = dict(params['model']['logits_layer'])
+        logits_layer_params['num_units'] = num_classes
+        logits = build_dense_layers(dense, [logits_layer_params], is_training)
 
     # return prediction specification
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -82,6 +81,11 @@ def model_fn(features, labels, mode, params):
             summaries=['learning_rate', 'loss', 'gradients', 'gradient_norm'],
             variables=train_vars,
         )
+
+        # perform update ops for batch normalization
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        train_op = tf.group([train_op, update_ops])
+
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
     # evaluation metrics

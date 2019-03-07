@@ -2,15 +2,29 @@ from functools import reduce
 import tensorflow as tf
 
 
-def build_conv_layers(input_tensor, conv_layers_params: list):
+def build_conv_layers(input_tensor, conv_layers_params: list, is_training: bool):
     for layer_params in conv_layers_params:
+        dropout_rate = layer_params.get('dropout_rate', 0)
+        if dropout_rate:
+            input_tensor = tf.layers.dropout(inputs=input_tensor, rate=dropout_rate, training=is_training)
+
+        l2_regularization = layer_params.get('l2_regularization', 0)
+        kernel_regularizer = None
+        if l2_regularization:
+            kernel_regularizer = tf.contrib.layers.l2_regularizer(scale=l2_regularization)
+
         input_tensor = tf.layers.conv2d(
             inputs=input_tensor,
             filters=layer_params['num_filters'],
             kernel_size=[layer_params['kernel_size'], layer_params['kernel_size']],
             padding=layer_params['padding'],
+            kernel_regularizer=kernel_regularizer,
             activation=tf.nn.relu)
+
         input_tensor = tf.layers.max_pooling2d(inputs=input_tensor, pool_size=[2, 2], strides=2)
+
+        if layer_params.get('batch_norm', False):
+            input_tensor = tf.layers.batch_normalization(input_tensor, training=is_training)
 
     flat_dim = reduce(lambda x, y: x * y, input_tensor.get_shape()[1:])
     flat = tf.reshape(input_tensor, [-1, flat_dim])

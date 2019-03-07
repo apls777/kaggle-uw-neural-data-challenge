@@ -37,7 +37,8 @@ def train(builder: AbstractBuilder, model_dir: str, reporter=None, session_confi
                                                                       run_every_steps=eval_steps)
         hooks.append(early_stopping_hook)
 
-    # in-memory evaluation on the training data
+    # in-memory evaluation on the training data (metrics from this evaluation will be more accurate than
+    # actual training metrics, because dropouts are disabled)
     train_evaluator = InMemoryEvaluatorHook(estimator, builder.build_eval_train_input_fn(), name='train', steps=1,
                                             every_n_iter=eval_steps)
     hooks.append(train_evaluator)

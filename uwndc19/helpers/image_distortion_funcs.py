@@ -1,3 +1,4 @@
+from math import pi
 import tensorflow as tf
 from tensorflow.python.ops import random_ops
 
@@ -21,11 +22,20 @@ def brightness(image, max_factor: float):
     return image
 
 
-def rotate(image, angle: float, interpolation: str):
-    assert angle > 0
+def rotate(image, max_angle: int, interpolation: str = 'BILINEAR'):
+    assert 0 < max_angle <= 180
     assert interpolation in ['NEAREST', 'BILINEAR']
 
-    rotate_angle = random_ops.random_uniform([], -angle, angle)
-    image = tf.contrib.image.rotate(image, rotate_angle, interpolation=interpolation)
+    max_angle_radians = tf.cast(max_angle, dtype=tf.float32) * pi / 180
+    rotate_angle_radians = random_ops.random_uniform([], -max_angle_radians, max_angle_radians)
 
-    return image
+    return tf.contrib.image.rotate(image, rotate_angle_radians, interpolation=interpolation)
+
+
+def rotate_choice(image, angles: list, interpolation: str = 'BILINEAR'):
+    assert interpolation in ['NEAREST', 'BILINEAR']
+
+    rotate_angle = tf.random.shuffle(angles)[0]
+    rotate_angle_radians = tf.cast(rotate_angle, dtype=tf.float32) * pi / 180
+
+    return tf.contrib.image.rotate(image, rotate_angle_radians, interpolation=interpolation)

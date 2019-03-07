@@ -9,7 +9,7 @@ def model_fn(features, labels, mode, params):
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
     # build convolutional layers
-    conv = build_conv_layers(image, params['model']['conv_layers'])
+    conv = build_conv_layers(image, params['model']['conv_layers'], is_training)
 
     # build dense layers
     dense = build_dense_layers(conv, params['model']['dense_layers'], is_training)  # [batch_size, units]
@@ -37,6 +37,11 @@ def model_fn(features, labels, mode, params):
             optimizer='Adam',
             summaries=['learning_rate', 'loss', 'gradients', 'gradient_norm'],
         )
+
+        # perform update ops for batch normalization
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        train_op = tf.group([train_op, update_ops])
+
         return tf.estimator.EstimatorSpec(mode=mode, loss=mse_loss, train_op=train_op)
 
     # evaluation metrics
