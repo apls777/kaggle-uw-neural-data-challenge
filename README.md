@@ -1,11 +1,12 @@
 # UW Neural Data Challenge 2019
 
-The challenge was to predict the responses of visual neurons to given images. Read more
-about this Kaggle challenge [here](https://www.kaggle.com/c/uwndc19).
+The challenge was to predict the responses of visual neurons to given images.
 
-## Final Model Architecture
+Read more about this Kaggle challenge [here](https://www.kaggle.com/c/uwndc19).
 
-[TODO: diagram]
+## The Final Model Architecture
+
+![Model Architecture](final_model.png)
 
 The model receives an image of size 48x48x3 as input and returns 18 continuous 
 values that correspond to square root of the number of spikes for each neuron.
@@ -15,7 +16,7 @@ the training saturation of each image was changed by a random factor picked in t
 You can find more details about the training in the model's [configuration file](configs/multiclass/final-model.yaml) 
 and [TensorBoard logs]().
 
-## Thoughts
+## Some Thoughts
 
 A model consisting of convolutional layers followed by dense layers was an obvious choice for this type of problem.
 The main issue was a small dataset, and as result, overfitting of training data.
@@ -32,15 +33,16 @@ Another technique to better generalize a model is to get more data. Of course, w
 could try to generate it by distorting original images. By distorting the images, there is a risk that we will 
 remove some information that was crucial for neurons spiking.
 
-So we need to make an assumption that some distortions don't affect neurons perception and check this hypothesis.
+So we need to make an assumption that some distortions don't affect the neurons perception and check this hypothesis.
 Unfortunately, the evaluation dataset is too small to say for sure that some distortions don't have affect
 and other do, but after some experiments I've concluded that the neurons don't care much about an image 
 saturation and rotations to small angles, but sensitive to vertical and horizontal flips.
 
-The final model was trained on images that were modified every epoch by changing saturation. The second best 
-model was trained with random saturation and, additionally, with rotations by a random angle in the interval 
-[-0.1, 0.1] radians. I think, this distortion didn't work very well, because images are too small and interpolation after 
-rotation actually changed some details on the images.
+The final model was trained on images that were modified every epoch by randomly changing their saturation. The 
+second best model was trained with random saturation and, additionally, with rotations by a random angle in the 
+interval [-0.1, 0.1] radians. I think, this distortion didn't work very well, because images are too small and 
+interpolation after rotation actually changed some details on the images.
+
 
 ## Model Configuration File
 
@@ -105,7 +107,7 @@ model:
 
   # a list of dense layers
   dense_layers:
-    - num_units: 512
+    - num_units: 512           # number of units
       dropout_rate: 0.4        # dropout rate (0 by default)
       l2_regularization: 0.0   # L2 regularization factor (0 by default)
 

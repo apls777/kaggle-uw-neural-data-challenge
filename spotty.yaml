@@ -20,7 +20,7 @@ container:
     - name: workspace
       mountPath: /workspace
   commands: |
-    pip install -r requirements.txt
+    pip install -r requirements-ray.txt
   runtimeParameters: ['--shm-size', '20G']
 
 instances:
