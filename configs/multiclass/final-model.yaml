@@ -1,0 +1,39 @@
+data:
+  eval_size: 20
+  random_seed: 130
+  distortions:
+    saturation:
+      min_value: 0.7
+      max_value: 1.3
+
+model:
+  image_size: 48
+  num_classes: 18
+
+  conv_layers:
+    - num_filters: 32
+      kernel_size: 5
+      padding: same
+
+    - num_filters: 64
+      kernel_size: 5
+      padding: same
+
+    - num_filters: 96
+      kernel_size: 5
+      padding: same
+
+  dense_layers:
+    - num_units: 512
+      dropout_rate: 0.4
+
+  logits_layer:
+    dropout_rate: 0.4
+
+training:
+  eval_steps: 50
+  early_stopping_evals: 5
+  learning_rate: 0.001
+  keep_checkpoint_max: 3
+  export_best_models: true
+  exports_to_keep: 3

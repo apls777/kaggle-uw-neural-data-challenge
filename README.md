@@ -9,47 +9,48 @@ Read more about this Kaggle challenge [here](https://www.kaggle.com/c/uwndc19).
 ![Model Architecture](final_model.png)
 
 The model receives an image of size 48x48x3 as input and returns 18 continuous 
-values that correspond to square root of the number of spikes for each neuron.
+values that correspond to a square root of a number of spikes for each neuron.
 
-The model was trained on 521 example, 20 examples were used for evaluation. During 
-the training saturation of each image was changed by a random factor picked in the interval [0.7, 1.3].
-You can find more details about the training in the model's [configuration file](configs/multiclass/final-model.yaml) 
-and [TensorBoard logs]().
+It was trained on 521 example, 20 examples were used for evaluation. During the training saturation of each 
+image was changed every epoch by a random factor picked in the interval [0.7, 1.3]. Find more details 
+about the training in the model's [configuration file](configs/multiclass/final-model.yaml).
 
 ## Some Thoughts
 
 A model consisting of convolutional layers followed by dense layers was an obvious choice for this type of problem.
-The main issue was a small dataset, and as result, overfitting of training data.
+The main issue was a small dataset, and, as result, overfitting of training data.
 
 #### Regularization
 
-To overcome the overfitting issue, a model should be somehow regularized, but if it's too regularized, it stops 
-learning things very well. I did a lot of experiments with dropouts, L2 regularizations and batch 
-normalizations, and eventually ended up regularazing only dense layers using dropout.
+To reduce an overfitting, the model should be carefully regularized, but not too much, otherwise it will decrease
+a model performance. I did a lot of experiments with dropouts, L2 regularizations and batch normalizations, 
+and eventually ended up regularizing only dense layers using dropout.
 
 #### Data Augmentation
 
-Another technique to better generalize a model is to get more data. Of course, we cannot get real data, but we 
-could try to generate it by distorting original images. By distorting the images, there is a risk that we will 
-remove some information that was crucial for neurons spiking.
+Another technique to help a model generalize better is to get more data. Of course, we cannot get more real data, 
+but we could try to generate it by distorting original images.
 
-So we need to make an assumption that some distortions don't affect the neurons perception and check this hypothesis.
-Unfortunately, the evaluation dataset is too small to say for sure that some distortions don't have affect
-and other do, but after some experiments I've concluded that the neurons don't care much about an image 
+Introducing distortions to the images, there is a risk to remove some information that is crucial for the neurons 
+spiking. So, we need to make an assumption that some distortions don't affect neurons perception and check this
+hypothesis on evaluation data.
+
+Unfortunately, the evaluation dataset is too small to say for sure that some distortions don't affect perception
+and other do, but after some experiments I've concluded that the neurons don't care much about image 
 saturation and rotations to small angles, but sensitive to vertical and horizontal flips.
 
 The final model was trained on images that were modified every epoch by randomly changing their saturation. The 
 second best model was trained with random saturation and, additionally, with rotations by a random angle in the 
-interval [-0.1, 0.1] radians. I think, this distortion didn't work very well, because images are too small and 
-interpolation after rotation actually changed some details on the images.
+interval [-0.1, 0.1] radians. I think, the rotation distortion didn't work very well, because the images are too 
+small and interpolation after rotation actually changes some details on them.
 
 
 ## Model Configuration File
 
-To train a new model you need to create a configuration file with hyper-parameter and training options. 
+To train a new model you need to create a configuration file with hyper-parameters and training options. 
 See a configuration example for the final model [here](configs/multiclass/final-model.yaml).
 
-Here is the format of the config file and descriptions for the parameters:
+Here is the format of the configuration file:
 
 ```yaml
 # input data configuration

@@ -1,5 +1,7 @@
 .idea/
 /data/
 /training/
-/configs/
+/configs/**
+!/configs/multiclass/
+!/configs/multiclass/final-model.yaml
 /ray_results/
