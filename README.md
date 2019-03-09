@@ -4,6 +4,7 @@ The challenge was to predict the responses of visual neurons to given images.
 
 Read more about this Kaggle challenge [here](https://www.kaggle.com/c/uwndc19).
 
+
 ## The Final Model Architecture
 
 ![Model Architecture](final_model.png)
@@ -14,6 +15,7 @@ values that correspond to a square root of a number of spikes for each neuron.
 It was trained on 521 example, 20 examples were used for evaluation. During the training saturation of each 
 image was changed every epoch by a random factor picked in the interval [0.7, 1.3]. Find more details 
 about the training in the model's [configuration file](configs/multiclass/final-model.yaml).
+
 
 ## Some Thoughts
 
@@ -127,7 +129,15 @@ training:
   exports_to_keep: 3           # number of the best models to keep
 ```
 
+
 ## Training
+
+### Prerequsites
+
+- Python >=3.5
+- TensorFlow 1.12
+
+The dataset files (`stim.npy` and `train.csv`) should be copied to the `data/` directory.
 
 ### Local training
 
@@ -161,7 +171,7 @@ A model can be trained on AWS using [Spotty](https://github.com/apls777/spotty).
     $ spotty run train -p MODEL_NAME=<MODEL_NAME> -S
     ```
     By default, it will use the `configs/multiclass/default.yaml` configuration file. 
-    See the [spotty.yaml](spotty.yaml) for the details.
+    See the [spotty.yaml](spotty.yaml) config for the details.
 
 4. Start TensorBoard to monitor the training:
     ```bash
@@ -170,8 +180,104 @@ A model can be trained on AWS using [Spotty](https://github.com/apls777/spotty).
     TensorBoard will be available on the port `6006`.
 
 __Note:__ Spotty v1.2 is not officially released yet, but can be installed from the
-the "dev-1.2" branch. Clone the repo, checkout the "dev-1.2" branch and run the following
+the "dev-1.2" branch. You can clone the repo, checkout the "dev-1.2" branch and run the following
 command to install it in the development mode:
 ```bash
 $ pip install -e .
 ```
+
+
+## Export Model
+
+If the "export_best_models" parameter in the configuration file is set to "true", the best
+models will be exported automatically during the training. You can find them in the 
+`<MODEL_DIR>/export/best` directory.
+
+Otherwise, you can use the following command to export a model from a custom checkpoint:
+```bash
+$ python uwndc19/scripts/train.py -d [MODEL_DIR] -s [CHECKPOINT_STEP]
+```
+If a checkpoint step is not specified, it will export the model using the latest checkpoint.
+
+The model will be exported to the `<MODEL_DIR>/export/checkpoints/<TIMESTAMP>` directory.
+
+
+## Predictions
+
+See an example how to do predictions using an exported model in the [predict.py](uwndc19/scripts/predict.py) file.
+
+Make sure that the `data/` directory contains the `stim.npy` file and run the following command
+to get predictions for the test dataset (first 50 images):
+
+```bash
+$ python uwndc19/scripts/predict.py
+```
+
+
+## Hyperparameters Tuning
+
+For hyperparameter tuning I tried to use the [Tune](https://ray.readthedocs.io/en/latest/tune.html) framework.
+
+To tune a model you should have 2 configuration files in some folder:
+1. A model's configuration file that will be tuned: `config.yaml`.
+2. Configuration file with possible "mutations": `mutations.yaml`.
+
+### Mutations Configuration File
+
+Here is an example of a configuration file with mutations:
+
+```yaml
+add_conv_layer:
+  - num_filters: [128, 256]
+    kernel_size: [3, 5]
+   
+  - num_filters: [196]
+    kernel_size: [7]
+
+change_conv_layer:
+  - layer_id: [2]
+    kernel_size: [3, 7]
+```
+
+Each key in this file is a mutation function, value is a list, where each element is a grid of parameters to search.
+A combination of parameters from the grid becomes arguments for the corresponding mutation function. All mutation functions 
+described in the [mutation_funcs.py](uwndc19/hp_tuning/mutation_funcs.py) file. 
+
+For this particular example 7 different mutations will be applied to a base configuration file: (128, 3), (128, 5), 
+(256, 3), (256, 5), (196, 7) for the "add_conv_layer" function and (2, 3), (2, 7) for the "change_conv_layer"
+function.
+
+### Tuning
+
+1. Make sure that the [tune.py](uwndc19/scripts/tune.py) file contains the right values for number of available 
+CPUs and number of CPUs and GPUs to use for each trial:
+
+    ```python
+    ray_num_cpus = 4
+    num_cpus_per_process = 1
+    num_gpus_per_process = 0.5
+    ```
+
+2. Use the following command to tune hyperparameters:
+
+    __Local:__
+    ```bash
+    $ python uwndc19/scripts/tune.py -g [EXPERIMENT_GROUP] -n [EXPERIMENT_NAME]
+    ```
+    
+    __AWS:__
+    ```bash
+    $ spotty run tune -p EXPERIMENT=<EXPERIMENT_NAME>
+    ```
+
+3. Use TensorBoard to track the experiment:
+    
+    __Local:__
+    ```bash
+    $ tensorboard --logdir ray_results/<EXPERIMENT_GROUP>/<EXPERIMENT_NAME>
+    ```
+
+    __AWS:__
+    ```bash
+    $ spotty run tensorboard-ray
+    ```

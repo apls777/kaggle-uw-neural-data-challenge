@@ -4,6 +4,7 @@ from tensorflow.contrib.estimator.python.estimator import early_stopping
 from uwndc19.hp_tuning.report_exporter import ReportExporter
 from .utils import root_dir
 from .abstract_builder import AbstractBuilder
+import os
 
 
 def train(builder: AbstractBuilder, model_dir: str, reporter=None, session_config=None):
@@ -72,3 +73,19 @@ def train(builder: AbstractBuilder, model_dir: str, reporter=None, session_confi
                                       throttle_secs=0)
 
     tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
+
+
+def export(builder: AbstractBuilder, model_dir: str, checkpoint_step: int = None):
+    model_dir = root_dir(model_dir)
+    export_dir = os.path.join(model_dir, 'export', 'checkpoints')
+    checkpoint_path = os.path.join(model_dir, 'model.ckpt-%s' % checkpoint_step) if checkpoint_step else None
+
+    # create an estimator
+    estimator = tf.estimator.Estimator(
+        model_fn=builder.build_model_fn(),
+        model_dir=model_dir,
+        params=builder.config,
+    )
+
+    estimator.export_savedmodel(export_dir, serving_input_receiver_fn=builder.build_serving_input_receiver_fn(),
+                                checkpoint_path=checkpoint_path)

@@ -12,9 +12,21 @@ def load_data():
     return df, imgs
 
 
+def crop_images(imgs: np.ndarray, image_size: int):
+    crop = ((80 - image_size) // 2) if image_size < 80 else 0
+    if crop:
+        imgs = imgs[:, crop:-crop, crop:-crop]
+
+    return imgs
+
+
 def get_train_datasets(df, imgs, eval_size, image_size=None, random_seed=RANDOM_SEED):
-    crop = ((80 - image_size) // 2) if image_size else 0
-    imgs = imgs[50:, crop:-crop, crop:-crop] if crop else imgs[50:]
+    # crop images
+    if image_size:
+        imgs = crop_images(imgs, image_size)
+
+    # get training images
+    imgs = imgs[50:]
 
     # get labels and the mask for NaN values
     labels = df[df.columns[1:]].values.astype(np.float32)
@@ -44,8 +56,12 @@ def get_train_datasets(df, imgs, eval_size, image_size=None, random_seed=RANDOM_
 
 
 def get_test_dataset(imgs, image_size=None):
-    crop = ((80 - image_size) // 2) if image_size else 0
-    imgs = imgs[:50, crop:-crop, crop:-crop] if crop else imgs[:50]
+    # crop images
+    if image_size:
+        imgs = crop_images(imgs, image_size)
+
+    # get test images
+    imgs = imgs[:50]
 
     return imgs
 
