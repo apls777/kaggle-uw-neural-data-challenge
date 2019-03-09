@@ -12,7 +12,7 @@ Read more about this Kaggle challenge [here](https://www.kaggle.com/c/uwndc19).
 The model receives an image of size 48x48x3 as input and returns 18 continuous 
 values that correspond to a square root of a number of spikes for each neuron.
 
-It was trained on 521 example, 20 examples were used for evaluation. During the training saturation of each 
+It was trained on 531 example, 20 examples were used for evaluation. During the training saturation of each 
 image was changed every epoch by a random factor picked in the interval [0.7, 1.3]. Find more details 
 about the training in the model's [configuration file](configs/multiclass/final-model.yaml).
 
