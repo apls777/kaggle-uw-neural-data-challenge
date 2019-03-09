@@ -1,5 +1,5 @@
 project:
-  name: hyperparams-optimization
+  name: uwndc19
   syncFilters:
     - exclude:
       - .git/*
