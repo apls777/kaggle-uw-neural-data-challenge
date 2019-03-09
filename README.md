@@ -218,7 +218,7 @@ $ python uwndc19/scripts/predict.py
 
 For hyperparameter tuning I tried to use the [Tune](https://ray.readthedocs.io/en/latest/tune.html) framework.
 
-To tune a model you should have 2 configuration files in some folder:
+To tune a model you should have 2 configuration files in the `configs/multiclass/hp_tuning/` directory:
 1. A model configuration file that will be tuned: `config.yaml`.
 2. A configuration file with possible "mutations": `mutations.yaml`.
 
