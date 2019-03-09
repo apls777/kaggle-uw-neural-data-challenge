@@ -48,7 +48,7 @@ small and interpolation after rotation actually changes some details on them.
 ## Model Configuration File
 
 To train a new model you need to create a configuration file with hyper-parameters and training options. 
-See a configuration example for the final model [here](configs/multiclass/final-model.yaml).
+See an example of a configuration file for the final model [here](configs/multiclass/final-model.yaml).
 
 Here is the format of the configuration file:
 
@@ -125,4 +125,53 @@ training:
   keep_checkpoint_max: 3       # maximum number of checkpoints to keep
   export_best_models: true     # export models with the best RMSE
   exports_to_keep: 3           # number of the best models to keep
+```
+
+## Training
+
+### Local training
+
+1. Create a [configuration file](#model-configuration-file) for the model.
+
+2. Run the training script:
+    ```bash
+    $ python uwndc19/scripts/train.py -d [MODEL_DIR] -c [CONFIG_PATH]
+    ```
+    By default, it will use the `configs/multiclass/default.yaml` configuration file and will save 
+    checkpoints and logs to the `training/multiclass/local/test1` directory.
+
+3. Start TensorBoard to monitor the training:
+    ```bash
+    tensorboard --logdir training/multiclass/local
+    ```
+
+### AWS training
+
+A model can be trained on AWS using [Spotty](https://github.com/apls777/spotty).
+
+1. Create a [configuration file](#model-configuration-file) for the model.
+
+2. Run the following command from the project's directory to start an instance:
+    ```bash
+    $ spotty start
+    ```
+
+3. Use the "train" Spotty script to start training:
+    ```bash
+    $ spotty run train -p MODEL_NAME=<MODEL_NAME> -S
+    ```
+    By default, it will use the `configs/multiclass/default.yaml` configuration file. 
+    See the [spotty.yaml](spotty.yaml) for the details.
+
+4. Start TensorBoard to monitor the training:
+    ```bash
+    $ spotty run tensorboard
+    ```
+    TensorBoard will be available on the port `6006`.
+
+__Note:__ Spotty v1.2 is not officially released yet, but can be installed from the
+the "dev-1.2" branch. Clone the repo, checkout the "dev-1.2" branch and run the following
+command to install it in the development mode:
+```bash
+$ pip install -e .
 ```

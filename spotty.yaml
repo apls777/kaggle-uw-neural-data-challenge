@@ -15,7 +15,7 @@ project:
 container:
   projectDir: /workspace/project
   image: tensorflow/tensorflow:1.12.0-gpu-py3
-  ports: [6006, 6007, 8888]
+  ports: [6006, 6007, 6008, 8888]
   volumeMounts:
     - name: workspace
       mountPath: /workspace
@@ -41,13 +41,21 @@ scripts:
       CONFIG={{CONFIG}}
       CONFIG=${CONFIG:-default}
       PYTHONPATH=. python uwndc19/scripts/train.py \
-        -d training/multiclass/experiments2/{{MODEL_NAME}} \
+        -d training/multiclass/gpu/{{MODEL_NAME}} \
         -c configs/multiclass/$CONFIG.yaml
     fi
 
   resume: |
     if [ -n "{{MODEL_NAME}}" ]; then
-      PYTHONPATH=. python uwndc19/scripts/train.py -d training/multiclass/experiments2/{{MODEL_NAME}}
+      PYTHONPATH=. python uwndc19/scripts/train.py -d training/multiclass/gpu/{{MODEL_NAME}}
+    fi
+
+  tensorboard: |
+    tensorboard --logdir training/multiclass/gpu
+
+  submission: |
+    if [ -n "{{MODEL_NAME}}" ]; then
+      PYTHONPATH=. python uwndc19/scripts/submission.py -d training/multiclass/gpu/{{MODEL_NAME}} -n {{NUM}}
     fi
 
   tune: |
@@ -55,24 +63,16 @@ scripts:
       PYTHONPATH=. python uwndc19/scripts/tune.py -g experiments2 -n {{EXPERIMENT}}
     fi
 
-  tensorboard: |
-    tensorboard --logdir training/multiclass/experiments2
-
   tensorboard-tuning: |
-    tensorboard --logdir training/multiclass/hp_tuning/experiments2
+    tensorboard --logdir training/multiclass/hp_tuning/experiments2 --port 6008
 
   tensorboard-ray: |
     tensorboard --logdir ray_results/experiments2 --port 6007
 
   remove-experiment: |
     if [ -n "{{EXPERIMENT}}" ]; then
-      rm -Rf training/multiclass/hp_tuning/experiments1/{{EXPERIMENT}}/*
-      rm -Rf ray_results/experiments1/{{EXPERIMENT}}/*
-    fi
-
-  submission: |
-    if [ -n "{{MODEL_NAME}}" ]; then
-      PYTHONPATH=. python uwndc19/scripts/submission.py -d training/multiclass/experiments2/{{MODEL_NAME}} -n {{NUM}}
+      rm -Rf training/multiclass/hp_tuning/experiments2/{{EXPERIMENT}}/*
+      rm -Rf ray_results/experiments2/{{EXPERIMENT}}/*
     fi
 
   jupyter: |
