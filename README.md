@@ -145,14 +145,14 @@ The dataset files (`stim.npy` and `train.csv`) should be copied to the `data/` d
 
 2. Run the training script:
     ```bash
-    $ python uwndc19/scripts/train.py -d [MODEL_DIR] -c [CONFIG_PATH]
+    $ python uwndc19/scripts/train.py [-d MODEL_DIR] [-c CONFIG_PATH]
     ```
     By default, it will use the `configs/multiclass/default.yaml` configuration file and will save 
     checkpoints and logs to the `training/multiclass/local/test1` directory.
 
 3. Start TensorBoard to monitor the training:
     ```bash
-    tensorboard --logdir training/multiclass/local
+    $ tensorboard --logdir training/multiclass/local
     ```
 
 ### AWS training
@@ -195,7 +195,7 @@ models will be exported automatically during the training. You can find them in 
 
 Otherwise, you can use the following command to export a model from a custom checkpoint:
 ```bash
-$ python uwndc19/scripts/train.py -d [MODEL_DIR] -s [CHECKPOINT_STEP]
+$ python uwndc19/scripts/export.py -d MODEL_DIR [-s CHECKPOINT_STEP]
 ```
 If a checkpoint step is not specified, it will export the model using the latest checkpoint.
 
@@ -204,7 +204,7 @@ The model will be exported to the `<MODEL_DIR>/export/checkpoints/<TIMESTAMP>` d
 
 ## Predictions
 
-See an example how to do predictions using an exported model in the [predict.py](uwndc19/scripts/predict.py) file.
+See an example how to use an exported model to do predictions in the [predict.py](uwndc19/scripts/predict.py) file.
 
 Make sure that the `data/` directory contains the `stim.npy` file and run the following command
 to get predictions for the test dataset (first 50 images):
@@ -219,8 +219,8 @@ $ python uwndc19/scripts/predict.py
 For hyperparameter tuning I tried to use the [Tune](https://ray.readthedocs.io/en/latest/tune.html) framework.
 
 To tune a model you should have 2 configuration files in some folder:
-1. A model's configuration file that will be tuned: `config.yaml`.
-2. Configuration file with possible "mutations": `mutations.yaml`.
+1. A model configuration file that will be tuned: `config.yaml`.
+2. A configuration file with possible "mutations": `mutations.yaml`.
 
 ### Mutations Configuration File
 
@@ -240,10 +240,10 @@ change_conv_layer:
 ```
 
 Each key in this file is a mutation function, value is a list, where each element is a grid of parameters to search.
-A combination of parameters from the grid becomes arguments for the corresponding mutation function. All mutation functions 
-described in the [mutation_funcs.py](uwndc19/hp_tuning/mutation_funcs.py) file. 
+A combination of parameters from the grid becomes arguments for the corresponding mutation function. All mutation 
+functions described in the [mutation_funcs.py](uwndc19/hp_tuning/mutation_funcs.py) file. 
 
-For this particular example 7 different mutations will be applied to a base configuration file: (128, 3), (128, 5), 
+For this particular example, 7 different mutations will be applied to a base configuration file: (128, 3), (128, 5), 
 (256, 3), (256, 5), (196, 7) for the "add_conv_layer" function and (2, 3), (2, 7) for the "change_conv_layer"
 function.
 
@@ -262,7 +262,7 @@ CPUs and number of CPUs and GPUs to use for each trial:
 
     __Local:__
     ```bash
-    $ python uwndc19/scripts/tune.py -g [EXPERIMENT_GROUP] -n [EXPERIMENT_NAME]
+    $ python uwndc19/scripts/tune.py -g EXPERIMENT_GROUP -n EXPERIMENT_NAME
     ```
     
     __AWS:__

@@ -80,6 +80,8 @@ def export(builder: AbstractBuilder, model_dir: str, checkpoint_step: int = None
     export_dir = os.path.join(model_dir, 'export', 'checkpoints')
     checkpoint_path = os.path.join(model_dir, 'model.ckpt-%s' % checkpoint_step) if checkpoint_step else None
 
+    os.makedirs(export_dir, exist_ok=True)
+
     # create an estimator
     estimator = tf.estimator.Estimator(
         model_fn=builder.build_model_fn(),
