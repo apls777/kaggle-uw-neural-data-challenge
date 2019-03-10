@@ -1,6 +1,7 @@
 # UW Neural Data Challenge 2019
 
-The challenge was to predict the responses of visual neurons to given images.
+This is the 1st place solution for the UW Neural Data Challenge. The challenge was to predict the responses of 
+visual neurons to given images.
 
 Read more about this Kaggle challenge [here](https://www.kaggle.com/c/uwndc19).
 
